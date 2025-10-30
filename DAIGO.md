@@ -35,3 +35,40 @@ The server responds with all games that are waiting for enough players.
 On an unknown message, the server must send an error message to the client.
 
 When a client disconnects, the server removes him from the list of clients.
+
+## Messages
+
+`HELO <name>`
+
+- `OK`
+- `ERROR`
+
+`CREATE`
+
+- `OK`
+- `ERROR`
+
+`LIST`
+
+- `GAMES <list>`
+- `ERROR`
+
+`JOIN <name>`
+
+- `OK`
+- `ERROR`
+
+`JOINED <name>`
+
+*no response*
+
+`PLAY`
+
+- `STONE <x> <y>`
+- `PASS`
+- `FORFEIT`
+
+`EXIT`
+
+*no response*
+
