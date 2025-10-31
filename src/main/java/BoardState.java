@@ -1,0 +1,347 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * The class BoardState describes a Go board in
+ * a particular position. The public methods are:
+ *
+ * boolean blackToPlay() :
+ *  gives true is it's black's turn, false if it's white's
+ * boolean isFinished() :
+ *  gives true if the game if finished, false otherwise
+ * boolean play(String move) :
+ *  Plays a move. if the move is not valid, then it doesn't
+ *  change the board's state and gives false.
+ *  If it is valid, it does the move and gives true.
+ *  a move is a String like "1,2", "p" (to pass) or "r"
+ *  (to resign)
+ * String toString() :
+ *  prints the board state
+ *
+ * The builder BoardState(int size, int bonusPoint) creates
+ * a new game, with the specified board size and bonus point for
+ * white. If no argument are given, 9 and 7 are the
+ * default value. Unlike in chess, black is the first player.
+ */
+
+public class BoardState {
+    // black = 1, white = -1
+    public final int[][] current;
+    private final int[][] previous;
+    int[] previousMove;
+    private boolean blackToPlay;
+    public final int bonusPoint;
+    int consecutivePasses;
+
+    boolean isFinished;
+    int winner;
+    boolean wonByResignation;
+    int blackScore;
+
+    public boolean blackToPlay(){
+        return blackToPlay;
+    };
+    public boolean isFinished(){
+        return isFinished;
+    }
+
+    public BoardState(int size, int bonusPoint) {
+        assert size>0;
+        this.bonusPoint = bonusPoint;
+        current = new int[size][size];
+        previous = new int[size][size];
+        previousMove = null;
+        blackToPlay = true;
+        consecutivePasses = 0;
+
+        isFinished = false;
+        winner = 0;
+        wonByResignation = false;
+        blackScore = 0;
+    }
+
+    public BoardState() {
+        this(9, 7);
+    }
+
+    private char visualiser(int x, int y) {
+        if(Arrays.equals(new int[]{x, y}, previousMove))
+            return blackToPlay ? 'W' : 'B';
+        int colour = current[x][y];
+        if(colour==0 | colour==11)
+            return ' ';
+        return colour > 0 ? 'b' : 'w';
+    }
+
+    private String oneLine(int i) {
+        int size = current.length;
+        StringBuilder sb = new StringBuilder();
+        sb.append(visualiser(i,0));
+        for(int j = 1; j<size; ++j) {
+            sb.append(" — ");
+            sb.append(visualiser(i,j));
+        }
+        return sb.toString();
+    }
+    private String sepLine() {
+        int size = current.length;
+        return "|" + "   |".repeat(Math.max(0, size - 1));
+    }
+
+    private String twoChar(int i) {
+        assert i<100;
+        if(i<10)
+            return " "+i;
+        else
+            return ""+i;
+    }
+    private String topLine() {
+        int size = current.length;
+        StringBuilder sb = new StringBuilder(" ");
+        for(int j = 0; j<size; ++j) {
+            sb.append("   ").append(j+1);
+        }
+        return sb.toString();
+    }
+
+    public String toString() {
+
+        int size = current.length;
+        StringBuilder sb = new StringBuilder(topLine());
+        sb.append("\n 1  ").append(oneLine(0));
+        for(int j = 1; j<size; ++j) {
+            sb.append("\n    ");
+            sb.append(sepLine());
+            sb.append('\n');
+            sb.append(twoChar(j+1)).append("  ");
+            sb.append(oneLine(j));
+        }
+
+        sb.append('\n');
+        if(consecutivePasses>0)
+            sb.append(blackToPlay ? "White" : "Black").append(" passed\n");
+        if(isFinished) {
+            sb.append("Game over!\n");
+            if(winner==0) {
+                sb.append("Nobody won!\n");
+                return sb.toString();
+            } else {
+                sb.append(winner>0? "Black":"White").append(" won by ");
+                sb.append(wonByResignation? "resignation\n" : Math.abs(blackScore)+" points\n" );
+            }
+
+        } else
+            sb.append(blackToPlay ? "Black" : "White").append(" to play\n");
+
+        return sb.toString();
+    }
+
+    private List<int[]> neighbours(int x, int y) {
+        List<int[]> listRet = new ArrayList<int[]>();
+        if(x>0)
+            listRet.add(new int[]{x-1, y});
+        if(x<current.length-1)
+            listRet.add(new int[]{x+1, y});
+        if(y>0)
+            listRet.add(new int[]{x, y-1});
+        if(y<current.length-1)
+            listRet.add(new int[]{x, y+1});
+
+        return listRet;
+    }
+
+    private static boolean containCorrect(List<int[]> list, int[] element) {
+        // the .contains() method is stupid so I made my own
+        for(int[] point : list)
+            if(Arrays.equals(element, point))
+                return true;
+        return false;
+    }
+
+    private boolean canBreathe(int x, int y, List<int[]> visited) {
+        visited.add(new int[]{x, y});
+        int colour = current[x][y];
+        if(colour==0)
+            return true;
+
+        boolean ret = false;
+        for(int[] point : neighbours(x, y)) {
+            if(!containCorrect(visited, point) & current[point[0]][point[1]] != -1*colour)
+                ret |= canBreathe(point[0], point[1], visited);
+        }
+        return ret;
+    }
+    private boolean canBreathe(int x, int y) {
+        List<int[]> visited = new ArrayList<int[]>();
+        return canBreathe(x, y, visited);
+    }
+
+    private void deleteGroup(int x, int y, int colour, List<int[]> deleted) {
+        if(current[x][y]!=colour)
+            return;
+        current[x][y] = 0;
+        deleted.add(new int[]{x, y});
+        for(int[] point : neighbours(x, y)) {
+            deleteGroup(point[0], point[1], colour, deleted);
+        }
+    }
+    private List<int[]> deleteGroup(int x, int y) {
+        List<int[]> deleted = new ArrayList<int[]>();
+        deleteGroup(x, y, current[x][y], deleted);
+        return deleted;
+    }
+
+    private void assignTerritory(int x, int y) {
+        //determine to whom belongs the emplacement x,y
+        //1, -1 : belongs certainly to black, white
+        //2, -2 : might belong to black, white
+        //0 : undecided
+        //11 : belongs certainly to nobody
+        //note : even number means it's uncertain
+        int i = current[x][y];
+        if(i%2!=0)
+            return;
+        boolean nextToBlack = false, nextToWhite = false, nextToNeutral = false;
+        for(int[] point : neighbours(x, y)) {
+            int j = current[point[0]][point[1]];
+            nextToNeutral |= j==11;
+            nextToWhite |= j<0;
+            nextToBlack |= (j>0 & j<10);
+        }
+        if(nextToNeutral | (nextToBlack & nextToWhite))
+            current[x][y] = 11;
+        else if(nextToBlack)
+            current[x][y] = 2;
+        else if(nextToWhite)
+            current[x][y] = -2;
+    }
+
+    private int calculateScore() {
+        for(int c = 0; c<2*current.length; ++c) {
+            //we assign the territory for each emplacement
+            //we repeat that 2*current.length times
+            for(int i = 0; i<current.length; ++i)
+                for(int j = 0; j<current.length; ++j)
+                    assignTerritory(i, j);
+        }
+
+        blackScore = -1*bonusPoint;
+        for(int i = 0; i<current.length; ++i)
+            for(int j = 0; j<current.length; ++j) {
+                int colour = current[i][j];
+                if(colour<0)
+                    --blackScore;
+                else if(colour>0 & colour<10)
+                    ++blackScore;
+            }
+
+        return blackScore;
+    }
+
+    private boolean playStone(int x, int y) {
+        if(Math.max(x,y) >= current.length || Math.min(x,y) < 0 || current[x][y]!=0)
+            return false;
+
+        int playing;
+        if(blackToPlay)
+            playing = 1;
+        else
+            playing = -1;
+
+        current[x][y] = playing;
+
+        // check if nearby enemy stones can breathe
+        // if not, we destroy them and save their positions
+        List<int[]> deletedStones = new ArrayList<int[]>();
+        for(int[] point : neighbours(x, y)) {
+            if(current[point[0]][point[1]] == -1*playing && !canBreathe(point[0], point[1]))
+                deletedStones.addAll(deleteGroup(point[0], point[1]));
+        }
+
+        // check if the played stone can breathe AND ko rule
+        if(!canBreathe(x, y) || Arrays.deepEquals(current, previous)) {
+            current[x][y] = 0;
+            // restore destroyed ennemy stones
+            for(int[] point : deletedStones)
+                current[point[0]][point[1]] = -1*playing;
+            return false;
+        } else { // if not, the move is valid
+            blackToPlay = !blackToPlay;
+            if(previousMove != null)
+                previous[previousMove[0]][previousMove[1]] = -1*playing;
+            previousMove = new int[]{x, y};
+            return true;
+        }
+
+    }
+
+    public boolean play(String move) {
+        if(isFinished)
+            return false;
+        move = move.replaceAll(" ", "");
+
+        if(move.length()==1) {
+            char c = move.charAt(0);
+            if(c == 'r' || c == 'R') {
+                isFinished = true;
+                winner = blackToPlay ? -1 : 1;
+                wonByResignation = true;
+            } else if(c == 'p' || c == 'P') {
+                blackToPlay = !blackToPlay;
+                previousMove = null;
+                ++consecutivePasses;
+                if(consecutivePasses>1) {
+                    isFinished = true;
+                    wonByResignation = false;
+                    winner = Integer.compare(calculateScore(), 0);
+                }
+            } else {
+                return false;
+            }
+
+            return true;
+        }
+
+        String[] sCoord = move.split(",");
+        if(sCoord.length != 2)
+            return false;
+
+        int x, y;
+        try {
+            x = Integer.parseInt(sCoord[0]);
+            y = Integer.parseInt(sCoord[1]);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return playStone(x-1, y-1);
+    }
+
+    public static void main(String[] args) {
+        BoardState board = new BoardState();
+
+        System.out.print(board);
+
+        board.play("1,1");
+        board.play(" 1 ,   2 ");
+        board.play("4,4");
+        board.play("2,1");
+        board.play("2,2");
+        board.play("1,1");
+        if(!board.play("1,1"))
+            System.out.println("ILLEGAL");
+        System.out.print(board);
+        board.play("1 , 3");
+        board.play("3,3");
+        System.out.print(board);
+        board.play("3,1");
+        System.out.print(board);
+
+        board.play("p");
+        System.out.print(board);
+        board.play("r");
+        System.out.print(board);
+
+    }
+}
