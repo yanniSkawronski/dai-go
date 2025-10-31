@@ -4,48 +4,52 @@ import java.util.List;
 
 /**
  * The class BoardState describes a Go board in
- * a particular position. The public methods are:
- *
- * boolean blackToPlay() :
- *  gives true is it's black's turn, false if it's white's
- * boolean isFinished() :
- *  gives true if the game if finished, false otherwise
- * boolean play(String move) :
- *  Plays a move. if the move is not valid, then it doesn't
- *  change the board's state and gives false.
- *  If it is valid, it does the move and gives true.
- *  a move is a String like "1,2", "p" (to pass) or "r"
- *  (to resign)
- * String toString() :
- *  prints the board state
- *
- * The builder BoardState(int size, int bonusPoint) creates
- * a new game, with the specified board size and bonus point for
- * white. If no argument are given, 9 and 7 are the
- * default value. Unlike in chess, black is the first player.
+ * a particular position.
  */
 
 public class BoardState {
     // black = 1, white = -1
     public final int[][] current;
     private final int[][] previous;
-    int[] previousMove;
+    private int[] previousMove;
     private boolean blackToPlay;
+
+    /**
+     * The additional points for white.
+     * Can be negative.
+     */
     public final int bonusPoint;
-    int consecutivePasses;
+    private int consecutivePasses;
 
-    boolean isFinished;
-    int winner;
-    boolean wonByResignation;
-    int blackScore;
+    private boolean isFinished;
+    private int winner;
+    private boolean wonByResignation;
+    private int blackScore;
 
+    /**
+     *
+     * @return true if it's black's turn,
+     * false if it's white's.
+     */
     public boolean blackToPlay(){
         return blackToPlay;
     };
+
+    /**
+     *
+     * @return true if the game is finished,
+     * false otherwise.
+     */
     public boolean isFinished(){
         return isFinished;
     }
 
+    /**
+     * Creates a new game. Black will be the first to play.
+     * @param size size of the board.
+     * @param bonusPoint bonus points for white.
+     *                  Recommended value for even game is 7.
+     */
     public BoardState(int size, int bonusPoint) {
         assert size>0;
         this.bonusPoint = bonusPoint;
@@ -61,6 +65,11 @@ public class BoardState {
         blackScore = 0;
     }
 
+    /**
+     * Creates a new game, with board size 9
+     * and bonus point for white 7.
+     * Black will be the first to play.
+     */
     public BoardState() {
         this(9, 7);
     }
@@ -276,6 +285,14 @@ public class BoardState {
 
     }
 
+    /**
+     * Plays a move
+     * @param move String of the form "2,3" (to play at
+     *             the given coordinates),
+     *             "p" (to pass),
+     *             "r" (to resign)
+     * @return true if the move is valid, false otherwise
+     */
     public boolean play(String move) {
         if(isFinished)
             return false;
@@ -318,30 +335,9 @@ public class BoardState {
         return playStone(x-1, y-1);
     }
 
+    /*
     public static void main(String[] args) {
         BoardState board = new BoardState();
-
-        System.out.print(board);
-
-        board.play("1,1");
-        board.play(" 1 ,   2 ");
-        board.play("4,4");
-        board.play("2,1");
-        board.play("2,2");
-        board.play("1,1");
-        if(!board.play("1,1"))
-            System.out.println("ILLEGAL");
-        System.out.print(board);
-        board.play("1 , 3");
-        board.play("3,3");
-        System.out.print(board);
-        board.play("3,1");
-        System.out.print(board);
-
-        board.play("p");
-        System.out.print(board);
-        board.play("r");
-        System.out.print(board);
-
     }
+    */
 }
