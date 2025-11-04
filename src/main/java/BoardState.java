@@ -264,7 +264,7 @@ public class BoardState {
 
     /**
      * Places a stone on the board
-     * @param x X coordinate (lowest is 1)0 km d'autono
+     * @param x X coordinate (lowest is 1)
      * @param y Y coordinate (lowest is 1)
      * @return True if the move is valid, false otherwise
      */
