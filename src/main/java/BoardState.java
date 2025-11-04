@@ -320,19 +320,17 @@ public class BoardState {
         }
         return true;
     }
-/*
-    public static void main(String[] args) {
-        BoardState board = new BoardState();
-        System.out.print(board);
-        board.playStone(2,1);
-        board.playStone(1,1);
-        System.out.print(board);
-        board.playStone(1,2);
-        board.playStone(4,4);
-        System.out.print(board);
-        board.pass();
-        board.pass();
-        System.out.print(board);
+
+    /**
+     * The player resigns
+     * @return True if the move is valid, false otherwise
+     */
+    public boolean resign() {
+        if(isFinished)
+            return false;
+        isFinished = true;
+        winner = blackToPlay ? -1 : 1;
+        wonByResignation = true;
+        return true;
     }
-*/
 }
