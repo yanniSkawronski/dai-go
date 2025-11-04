@@ -53,6 +53,15 @@ public class BoardState {
     }
 
     /**
+     * Returns the winner
+     * @return 1 for black, -1 for white, 0 for no winner
+     * (or game unfinished)
+     */
+    public int winner(){
+        return winner;
+    }
+
+    /**
      * Creates a new game. Black will be the first to play.
      * @param size size of the board (from 1 to 99).
      * @param bonusPoint bonus points for white.
@@ -311,56 +320,18 @@ public class BoardState {
         }
         return true;
     }
-
-    /**
-     * The player resigns
-     * @return True if the move is valid, false otherwise
-     */
-    public boolean resign() {
-        if(isFinished)
-            return false;
-        isFinished = true;
-        winner = blackToPlay ? -1 : 1;
-        wonByResignation = true;
-        return true;
-    }
-
-    /**
-     * Plays a move (play a stone, pass, or resign).
-     * This method is safe and throws no exception.
-     * @param move String of the form "x,y" (to play at
-     *             the given coordinates),
-     *             "p" (to pass),
-     *             "r" (to resign)
-     * @return true if the move is valid, false otherwise
-     */
-    public boolean play(String move) {
-        move = move.replaceAll(" ", "");
-        if(move.isBlank())
-            return false;
-
-        String[] sCoord = move.split(",");
-
-        if(sCoord.length == 1) {
-            char c = move.charAt(0);
-            if(c == 'r' || c == 'R')
-                return resign();
-            else if(c == 'p' || c == 'P')
-                return pass();
-            else
-                return false;
-        } else if(sCoord.length != 2)
-            return false;
-
-        try {
-            return playStone(Integer.parseInt(sCoord[0]), Integer.parseInt(sCoord[1]));
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 /*
     public static void main(String[] args) {
         BoardState board = new BoardState();
+        System.out.print(board);
+        board.playStone(2,1);
+        board.playStone(1,1);
+        System.out.print(board);
+        board.playStone(1,2);
+        board.playStone(4,4);
+        System.out.print(board);
+        board.pass();
+        board.pass();
         System.out.print(board);
     }
 */
