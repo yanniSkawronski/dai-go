@@ -253,10 +253,18 @@ public class BoardState {
         return blackScore;
     }
 
-    private boolean playStone(int x, int y) {
-        if(Math.max(x,y) >= current.length || Math.min(x,y) < 0 || current[x][y]!=0)
+    /**
+     * Places a stone on the board
+     * @param x X coordinate (lowest is 1)0 km d'autono
+     * @param y Y coordinate (lowest is 1)
+     * @return True if the move is valid, false otherwise
+     */
+    public boolean playStone(int x, int y) {
+        if(Math.max(--x,--y) >= current.length || Math.min(x,y) < 0 ||
+                current[x][y]!=0 || isFinished)
             return false;
 
+        consecutivePasses = 0;
         int playing = blackToPlay ? 1 : -1;
 
         current[x][y] = playing;
@@ -272,7 +280,7 @@ public class BoardState {
         // check if the played stone can breathe AND ko rule
         if(!canBreathe(x, y) || Arrays.deepEquals(current, previous)) {
             current[x][y] = 0;
-            // restore destroyed ennemy stones
+            // restore destroyed enemy stones
             for(int[] point : deletedStones)
                 current[point[0]][point[1]] = -1*playing;
             return false;
@@ -287,7 +295,39 @@ public class BoardState {
     }
 
     /**
-     * Plays a move
+     * The player passes
+     * @return True if the move is valid, false otherwise
+     */
+    public boolean pass() {
+        if(isFinished)
+            return false;
+        blackToPlay = !blackToPlay;
+        previousMove = null;
+        ++consecutivePasses;
+        if(consecutivePasses>1) {
+            isFinished = true;
+            wonByResignation = false;
+            winner = Integer.compare(calculateScore(), 0);
+        }
+        return true;
+    }
+
+    /**
+     * The player resigns
+     * @return True if the move is valid, false otherwise
+     */
+    public boolean resign() {
+        if(isFinished)
+            return false;
+        isFinished = true;
+        winner = blackToPlay ? -1 : 1;
+        wonByResignation = true;
+        return true;
+    }
+
+    /**
+     * Plays a move (play a stone, pass, or resign).
+     * This method is safe and throws no exception.
      * @param move String of the form "x,y" (to play at
      *             the given coordinates),
      *             "p" (to pass),
@@ -296,47 +336,31 @@ public class BoardState {
      */
     public boolean play(String move) {
         move = move.replaceAll(" ", "");
-        if(isFinished || move.isEmpty())
+        if(move.isBlank())
             return false;
 
         String[] sCoord = move.split(",");
 
         if(sCoord.length == 1) {
             char c = move.charAt(0);
-            if(c == 'r' || c == 'R') {
-                isFinished = true;
-                winner = blackToPlay ? -1 : 1;
-                wonByResignation = true;
-            } else if(c == 'p' || c == 'P') {
-                blackToPlay = !blackToPlay;
-                previousMove = null;
-                ++consecutivePasses;
-                if(consecutivePasses>1) {
-                    isFinished = true;
-                    wonByResignation = false;
-                    winner = Integer.compare(calculateScore(), 0);
-                }
-            } else {
+            if(c == 'r' || c == 'R')
+                return resign();
+            else if(c == 'p' || c == 'P')
+                return pass();
+            else
                 return false;
-            }
-
-            return true;
         } else if(sCoord.length != 2)
             return false;
 
-        int x, y;
         try {
-            x = Integer.parseInt(sCoord[0]);
-            y = Integer.parseInt(sCoord[1]);
+            return playStone(Integer.parseInt(sCoord[0]), Integer.parseInt(sCoord[1]));
         } catch (NumberFormatException e) {
             return false;
         }
-
-        return playStone(x-1, y-1);
     }
 /*
     public static void main(String[] args) {
-        BoardState board = new BoardState(7, 7);
+        BoardState board = new BoardState();
         System.out.print(board);
     }
 */
