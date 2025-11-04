@@ -9,7 +9,7 @@ import java.util.List;
 
 public class BoardState {
     // black = 1, white = -1
-    public final int[][] current;
+    private final int[][] current;
     private final int[][] previous;
     private int[] previousMove;
     private boolean blackToPlay;
@@ -19,6 +19,14 @@ public class BoardState {
      * Can be negative.
      */
     public final int bonusPoint;
+    /**
+     * Name of the white player
+     */
+    public final String black;
+    /**
+     * Name of the white player
+     */
+    public final String white;
     private int consecutivePasses;
 
     private boolean isFinished;
@@ -46,12 +54,13 @@ public class BoardState {
 
     /**
      * Creates a new game. Black will be the first to play.
-     * @param size size of the board.
+     * @param size size of the board (from 1 to 99).
      * @param bonusPoint bonus points for white.
      *                  Recommended value for even game is 7.
      */
     public BoardState(int size, int bonusPoint) {
-        assert size>0;
+        if(size<1 || size>99)
+            throw new IllegalArgumentException("Board size must be from 1 to 99\n");
         this.bonusPoint = bonusPoint;
         current = new int[size][size];
         previous = new int[size][size];
@@ -63,6 +72,9 @@ public class BoardState {
         winner = 0;
         wonByResignation = false;
         blackScore = 0;
+
+        black = "Black";
+        white = "White";
     }
 
     /**
@@ -78,7 +90,7 @@ public class BoardState {
         if(Arrays.equals(new int[]{x, y}, previousMove))
             return blackToPlay ? 'W' : 'B';
         int colour = current[x][y];
-        if(colour==0 | colour==11)
+        if(colour==0 || colour==11)
             return ' ';
         return colour > 0 ? 'b' : 'w';
     }
@@ -94,23 +106,17 @@ public class BoardState {
         return sb.toString();
     }
     private String sepLine() {
-        int size = current.length;
-        return "|" + "   |".repeat(Math.max(0, size - 1));
+        return "|" + "   |".repeat(current.length-1);
     }
 
     private String twoChar(int i) {
-        assert i<100;
-        if(i<10)
-            return " "+i;
-        else
-            return ""+i;
+        return i<10 ? " "+i : ""+i;
     }
     private String topLine() {
         int size = current.length;
         StringBuilder sb = new StringBuilder(" ");
-        for(int j = 0; j<size; ++j) {
-            sb.append("   ").append(j+1);
-        }
+        for(int j = 0; j<size; ++j)
+            sb.append("  ").append(twoChar(j+1));
         return sb.toString();
     }
 
@@ -121,27 +127,25 @@ public class BoardState {
         sb.append("\n 1  ").append(oneLine(0));
         for(int j = 1; j<size; ++j) {
             sb.append("\n    ");
-            sb.append(sepLine());
-            sb.append('\n');
+            sb.append(sepLine()).append('\n');
             sb.append(twoChar(j+1)).append("  ");
             sb.append(oneLine(j));
         }
 
         sb.append('\n');
         if(consecutivePasses>0)
-            sb.append(blackToPlay ? "White" : "Black").append(" passed\n");
+            sb.append(blackToPlay ? white : black).append(" passed\n");
         if(isFinished) {
             sb.append("Game over!\n");
             if(winner==0) {
                 sb.append("Nobody won!\n");
-                return sb.toString();
             } else {
-                sb.append(winner>0? "Black":"White").append(" won by ");
+                sb.append(winner>0? black : white).append(" won by ");
                 sb.append(wonByResignation? "resignation\n" : Math.abs(blackScore)+" points\n" );
             }
 
         } else
-            sb.append(blackToPlay ? "Black" : "White").append(" to play\n");
+            sb.append(blackToPlay ? black : white).append(" to play\n");
 
         return sb.toString();
     }
@@ -176,8 +180,8 @@ public class BoardState {
 
         boolean ret = false;
         for(int[] point : neighbours(x, y)) {
-            if(!containCorrect(visited, point) & current[point[0]][point[1]] != -1*colour)
-                ret |= canBreathe(point[0], point[1], visited);
+            if(!containCorrect(visited, point) && current[point[0]][point[1]] != -1*colour)
+                ret = canBreathe(point[0], point[1], visited) || ret;
         }
         return ret;
     }
@@ -197,7 +201,8 @@ public class BoardState {
     }
     private List<int[]> deleteGroup(int x, int y) {
         List<int[]> deleted = new ArrayList<int[]>();
-        deleteGroup(x, y, current[x][y], deleted);
+        if(current[x][y]!=0)
+            deleteGroup(x, y, current[x][y], deleted);
         return deleted;
     }
 
@@ -214,11 +219,11 @@ public class BoardState {
         boolean nextToBlack = false, nextToWhite = false, nextToNeutral = false;
         for(int[] point : neighbours(x, y)) {
             int j = current[point[0]][point[1]];
-            nextToNeutral |= j==11;
-            nextToWhite |= j<0;
-            nextToBlack |= (j>0 & j<10);
+            nextToNeutral = j==11 || nextToNeutral;
+            nextToWhite = j<0 || nextToWhite;
+            nextToBlack = (j>0 && j<10) || nextToBlack;
         }
-        if(nextToNeutral | (nextToBlack & nextToWhite))
+        if(nextToNeutral || (nextToBlack && nextToWhite))
             current[x][y] = 11;
         else if(nextToBlack)
             current[x][y] = 2;
@@ -241,7 +246,7 @@ public class BoardState {
                 int colour = current[i][j];
                 if(colour<0)
                     --blackScore;
-                else if(colour>0 & colour<10)
+                else if(colour>0 && colour<10)
                     ++blackScore;
             }
 
@@ -252,11 +257,7 @@ public class BoardState {
         if(Math.max(x,y) >= current.length || Math.min(x,y) < 0 || current[x][y]!=0)
             return false;
 
-        int playing;
-        if(blackToPlay)
-            playing = 1;
-        else
-            playing = -1;
+        int playing = blackToPlay ? 1 : -1;
 
         current[x][y] = playing;
 
@@ -287,18 +288,20 @@ public class BoardState {
 
     /**
      * Plays a move
-     * @param move String of the form "2,3" (to play at
+     * @param move String of the form "x,y" (to play at
      *             the given coordinates),
      *             "p" (to pass),
      *             "r" (to resign)
      * @return true if the move is valid, false otherwise
      */
     public boolean play(String move) {
-        if(isFinished)
-            return false;
         move = move.replaceAll(" ", "");
+        if(isFinished || move.isEmpty())
+            return false;
 
-        if(move.length()==1) {
+        String[] sCoord = move.split(",");
+
+        if(sCoord.length == 1) {
             char c = move.charAt(0);
             if(c == 'r' || c == 'R') {
                 isFinished = true;
@@ -318,10 +321,7 @@ public class BoardState {
             }
 
             return true;
-        }
-
-        String[] sCoord = move.split(",");
-        if(sCoord.length != 2)
+        } else if(sCoord.length != 2)
             return false;
 
         int x, y;
@@ -334,10 +334,10 @@ public class BoardState {
 
         return playStone(x-1, y-1);
     }
-
-    /*
+/*
     public static void main(String[] args) {
-        BoardState board = new BoardState();
+        BoardState board = new BoardState(7, 7);
+        System.out.print(board);
     }
-    */
+*/
 }
