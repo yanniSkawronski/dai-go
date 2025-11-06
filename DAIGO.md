@@ -38,37 +38,134 @@ When a client disconnects, the server removes him from the list of clients.
 
 ## Messages
 
-`HELO <name>`
+### Join the server
+The client sends a hello message to the server indicating the client's username
 
-- `OK`
-- `ERROR`
+**Request**
 
-`CREATE`
+```
+HELO <name>
+```
+- `name`: the name of the client
 
-- `OK`
-- `ERROR`
+**Response**
+- `OK`: the client
+- `ERROR <code>`: an error occurred,
+  the code is an integer among the following list:
+  - 1 - Name already taken
 
-`LIST`
+### Create a new game 
+
+The client creates a new game
+
+**Request**
+```
+CREATE
+```
+
+**Response**
+
+- `OK`: The game has been created and is open to be joined by other players
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+  - 1 - The client is already in a game
+
+### List open games
+
+The client requests a list of open games.
+
+**Request**
+```
+LIST
+```
+
+**Response**
 
 - `GAMES <list>`
-- `ERROR`
+    - `list` a list of space separated names of players
+        which are waiting in a game that is not yet full
 
-`JOIN <name>`
+### Join an existing game
 
-- `OK`
-- `ERROR`
+The client requests to join the game with a certain player.
 
-`JOINED <name>`
+**Request**
+```
+JOIN <name>
+```
+- `name` : name of the player to join in game
+
+**Response**
+
+- `OK` : game joined succesfully
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+    - 1 - The client is already in a game
+    - 2 - The requested game does not exist
+
+### A player joins a game
+
+The server tells the client that a player joined his game.
+
+**Request**
+```
+JOINED <name>
+```
+- `name` : name of the player that just joined
+
+**Response**
+
+None.
+
+### Get your turn
+
+The server tells the client that it is his turn to play.
+
+# TODO
+
+`PLAY`
+C'est au client de jouer
 
 *no response*
 
-`PLAY`
+`STONE <x> <y>`
+Jouer une pierre en x et y
+- `OK`
+- `ERROR`
 
-- `STONE <x> <y>`
-- `PASS`
-- `FORFEIT`
+`PASS`
+Passer son tour
+- `OK`
+- `ERROR`
+ 
+`FORFEIT`
+Abandonner
+- `OK`
+- `ERROR`
+
+`PLAYED STONE <x> <y>`
+L'autre joueur a joue en x, y
+
+*no response*
+
+`PLAYED PASS`
+L'autre joueur a passé
+
+*no response*
+
+`PLAYED FORFEIT`
+L'autre joueur a abandonné
+
+*no response*
+
+`PLAYED DISCONNECT`
+L'autre joueur s'est déconnecté
+
+*no response*
 
 `EXIT`
+Leave the server
+(Forfeiting game if any in progress)
 
 *no response*
 
