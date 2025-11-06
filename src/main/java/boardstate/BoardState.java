@@ -1,10 +1,11 @@
+package boardstate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * The class BoardState describes a Go board in
- * a particular position.
+ * Describes a Go board in a particular position.
  */
 
 public class BoardState {
