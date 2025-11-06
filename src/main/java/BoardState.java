@@ -20,7 +20,7 @@ public class BoardState {
      */
     public final int bonusPoint;
     /**
-     * Name of the white player
+     * Name of the black player
      */
     public final String black;
     /**
