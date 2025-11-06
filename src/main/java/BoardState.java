@@ -67,7 +67,7 @@ public class BoardState {
      * @param bonusPoint bonus points for white.
      *                  Recommended value for even game is 7.
      */
-    public BoardState(int size, int bonusPoint) {
+    public BoardState(int size, int bonusPoint) throws IllegalArgumentException {
         if(size<1 || size>99)
             throw new IllegalArgumentException("Board size must be from 1 to 99\n");
         this.bonusPoint = bonusPoint;
