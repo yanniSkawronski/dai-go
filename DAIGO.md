@@ -121,51 +121,143 @@ None.
 
 The server tells the client that it is his turn to play.
 
-# TODO
+**Request**
 
-`PLAY`
-C'est au client de jouer
+```
+PLAY
+```
 
-*no response*
+**Response**
 
-`STONE <x> <y>`
-Jouer une pierre en x et y
-- `OK`
-- `ERROR`
+None.
 
-`PASS`
-Passer son tour
-- `OK`
-- `ERROR`
- 
-`FORFEIT`
-Abandonner
-- `OK`
-- `ERROR`
+### Play a stone
 
-`PLAYED STONE <x> <y>`
-L'autre joueur a joue en x, y
+The client informs the server where he plays a stone.
 
-*no response*
+**Request**
 
-`PLAYED PASS`
-L'autre joueur a passé
+```
+STONE <x> <y>
+```
+- `x` : horizontal position on the board
+- `y` : vertical position on the board
 
-*no response*
+**Response**
 
-`PLAYED FORFEIT`
-L'autre joueur a abandonné
+- `OK` : The stone has been placed on the board successfully.
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+    - 1 - The client is not in a game
+    - 2 - It is not the clients turn
+    - 3 - The move is invalid
 
-*no response*
+### Pass your turn
 
-`PLAYED DISCONNECT`
-L'autre joueur s'est déconnecté
+The client tells the server he passes his turn.
 
-*no response*
+**Request**
 
-`EXIT`
-Leave the server
-(Forfeiting game if any in progress)
+```
+PASS
+```
 
-*no response*
+**Response**
 
+- `OK` : The client passed the turn successfully.
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+    - 1 - The client is not in a game
+    - 2 - It is not the clients turn
+
+### Forfeit the game
+
+The client tells the server he forfeits the current game.
+
+**Request**
+
+```
+FORFEIT
+```
+
+**Response**
+
+- `OK` : forfeit was successfull, game has been terminated with a loss for the client.
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+    - 1 - The client is not in a game
+
+### Receive stone played
+
+The server informs the client where his opponent played a stone.
+
+**Request**
+
+```
+PLAYER STONE <x> <y>
+```
+- `x` : horizontal position on the board
+- `y` : vertical position on the board
+
+**Response**
+
+None.
+
+### Receive opponent passed
+
+The server informs the client that his opponent passed his turn.
+
+**Request**
+
+```
+PLAYER PASS
+```
+
+**Response**
+
+None.
+
+### Receive opponent forfeit
+
+The server informs the client that his opponent forfeited the game.
+This means the game has been terminated and the client won.
+
+**Request**
+
+```
+PLAYER FORFEIT
+```
+
+**Response**
+
+None.
+
+### Receive opponent disconnect
+
+The server informs the client that his opponent disconnected.
+This means the game has been terminated and the client won.
+
+**Request**
+
+```
+PLAYER DISCONNECT
+```
+
+**Response**
+
+None.
+
+### Exit the server
+
+The client informs the server that he quits.
+The server should close the connection.
+
+**Request**
+
+```
+EXIT
+```
+
+**Response**
+
+None.
