@@ -33,6 +33,9 @@ and the clients can start playing on their turn.
 A client can play a stone, pass or forfeit. If the play is valid,
 the server lets the second player play, otherwise it responds with an error message.
 
+Coordinates for stones are x - horizontal and y - vertical, starting from the
+top left corner.
+
 On an unknown message, the server must send an error message to the client.
 
 When a client disconnects, the server removes him from the list of clients.
@@ -141,8 +144,8 @@ The client informs the server where he plays a stone.
 ```
 STONE <x> <y>
 ```
-- `x` : horizontal position on the board
-- `y` : vertical position on the board
+- `x` : horizontal position on the board, starting from the left
+- `y` : vertical position on the board, starting from the top
 
 **Response**
 
@@ -197,8 +200,8 @@ The server informs the client where his opponent played a stone.
 ```
 PLAYER STONE <x> <y>
 ```
-- `x` : horizontal position on the board
-- `y` : vertical position on the board
+- `x` : horizontal position on the board, starting from the left
+- `y` : vertical position on the board, starting from the top
 
 **Response**
 
