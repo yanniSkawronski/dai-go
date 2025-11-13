@@ -335,4 +335,20 @@ public class Board {
         wonByResignation = true;
         return true;
     }
+
+    enum Stone {
+        BLACK,
+        WHITE,
+        BLANK,
+        ERROR
+    }
+
+    Stone getStone(int X, int Y) {
+        return switch (current[Y - 1][X - 1]) {
+            case -1 -> Stone.WHITE;
+            case 0 -> Stone.BLANK;
+            case 1 -> Stone.BLACK;
+            default -> Stone.ERROR;
+        };
+    }
 }
