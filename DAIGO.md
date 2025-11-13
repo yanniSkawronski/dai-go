@@ -248,6 +248,22 @@ PLAYER DISCONNECT
 
 None.
 
+### Game ends
+
+The server informs the client of the result of the game.
+This means the game has been terminated.
+
+**Request**
+
+```
+GAME <result>
+```
+- `result` : `1` for win and `0` for a loss.
+
+**Response**
+
+None.
+
 ### Exit the server
 
 The client informs the server that he quits.
