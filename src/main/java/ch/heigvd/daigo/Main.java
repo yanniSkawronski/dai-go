@@ -1,6 +1,6 @@
-package ch.heigvd.dai;
+package ch.heigvd.daigo;
 
-import ch.heigvd.dai.commands.Root;
+import ch.heigvd.daigo.commands.Root;
 import java.io.File;
 import picocli.CommandLine;
 

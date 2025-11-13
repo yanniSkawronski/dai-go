@@ -1,4 +1,4 @@
-package ch.heigvd.dai.commands;
+package ch.heigvd.daigo.commands;
 
 import picocli.CommandLine;
 
