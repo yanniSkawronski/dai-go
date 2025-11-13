@@ -1,4 +1,4 @@
-package boardstate;
+package ch.heigvd.go;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.List;
  * Describes a Go board in a particular position.
  */
 
-public class BoardState {
+public class Board {
     // black = 1, white = -1
     private final int[][] current;
     private final int[][] previous;
@@ -68,7 +68,7 @@ public class BoardState {
      * @param bonusPoint bonus points for white.
      *                  Recommended value for even game is 7.
      */
-    public BoardState(int size, int bonusPoint) throws IllegalArgumentException {
+    public Board(int size, int bonusPoint) throws IllegalArgumentException {
         if(size<1 || size>99)
             throw new IllegalArgumentException("Board size must be from 1 to 99\n");
         this.bonusPoint = bonusPoint;
@@ -92,7 +92,7 @@ public class BoardState {
      * and bonus point for white 7.
      * Black will be the first to play.
      */
-    public BoardState() {
+    public Board() {
         this(9, 7);
     }
 
