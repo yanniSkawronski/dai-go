@@ -264,7 +264,7 @@ public class Board {
     }
 
     /**
-     * Places a stone on the board. (-1, -1) is at the top left.
+     * Places a stone on the board. (1, 1) is at the top left.
      * @param X horizontal coordinate, starting from the left (lowest is 1)
      * @param Y vertical coordinate, starting from the top (lowest is 1)
      * @return True if the move is valid, false otherwise
