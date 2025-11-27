@@ -36,19 +36,25 @@ class BoardTest {
 
     @org.junit.jupiter.api.Test
     void winner() {
-        fail("Not yet implemented");
-    }
-
-    @org.junit.jupiter.api.Test
-    void testToString() {
-        fail("Not yet implemented");
+        assertEquals(0, board.winner());
+        assertTrue(board.playStone(3, 5));
+        board.pass();
+        board.pass();
+        assertEquals(1, board.winner());
     }
 
     @org.junit.jupiter.api.Test
     void playStone() {
         assertTrue(board.playStone(5, 5));
-        assertFalse(board.playStone(5, 5));
-        fail("Needs to be expanded test");
+        assertFalse(board.playStone(5, 5)); // white
+        assertTrue(board.playStone(5, 6)); // white
+        assertTrue(board.playStone(6, 6));
+        assertTrue(board.playStone(1, 1)); // white
+        assertTrue(board.playStone(4, 6));
+        assertTrue(board.playStone(1, 2)); // white
+        assertTrue(board.playStone(5, 7));
+
+        // check if captured
     }
 
     @org.junit.jupiter.api.Test
@@ -61,6 +67,8 @@ class BoardTest {
 
     @org.junit.jupiter.api.Test
     void resign() {
-        fail("Not yet implemented");
+        assertTrue(board.resign());
+        assertEquals(-1, board.winner());
+        assertFalse(board.resign());
     }
 }
