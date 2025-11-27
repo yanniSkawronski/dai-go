@@ -187,4 +187,13 @@ class BoardTest {
 
         assertFalse(board.playStone(5, 3)); // invalid play
     }
+
+    @org.junit.jupiter.api.Test
+    void edgeCapture() {
+        board.playStone(1, 2);
+        board.playStone(1, 1);
+        board.playStone(2, 1);
+        assertEquals(Board.Stone.BLANK, board.getStone(1, 1));
+        assertFalse(board.playStone(1, 1));
+    }
 }
