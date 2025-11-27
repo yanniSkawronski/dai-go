@@ -216,3 +216,13 @@ None.
 ### Exit the server
 To exit the server, the client simply disconnects.
 The server then closes the client socket and updates the game, if any he was in.
+
+### Unknown Message
+
+On an unknown message, the server answers with an error.
+
+**Response**
+
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+    - -1 - Unknown message received.
