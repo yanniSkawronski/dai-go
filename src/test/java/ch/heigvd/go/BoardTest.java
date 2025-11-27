@@ -47,14 +47,25 @@ class BoardTest {
     void playStone() {
         assertTrue(board.playStone(5, 5));
         assertFalse(board.playStone(5, 5)); // white
+        assertEquals(Board.Stone.BLACK, board.getStone(5, 5));
+
         assertTrue(board.playStone(5, 6)); // white
-        assertTrue(board.playStone(6, 6));
-        assertTrue(board.playStone(1, 1)); // white
-        assertTrue(board.playStone(4, 6));
-        assertTrue(board.playStone(1, 2)); // white
-        assertTrue(board.playStone(5, 7));
+        assertEquals(Board.Stone.WHITE, board.getStone(5, 6));
+
+        board.playStone(6, 6);
+        board.pass(); // white
+        board.playStone(4, 6);
+        board.pass(); // white
+        board.playStone(5, 7);
 
         // check if captured
+        assertEquals(Board.Stone.BLANK, board.getStone(5, 6));
+
+        board.playStone(5, 4); // white
+        board.pass();
+        board.playStone(4, 5); // white
+        board.pass();
+        board.playStone(6, 5); // white
     }
 
     @org.junit.jupiter.api.Test
@@ -70,5 +81,43 @@ class BoardTest {
         assertTrue(board.resign());
         assertEquals(-1, board.winner());
         assertFalse(board.resign());
+    }
+
+    @org.junit.jupiter.api.Test
+    void captureStone() {
+        board.playStone(5, 5);
+
+        board.playStone(5, 6); // white
+
+        board.playStone(6, 6);
+        board.pass(); // white
+        board.playStone(4, 6);
+        board.pass(); // white
+        board.playStone(5, 7); // black captures white on 5, 6
+
+        // check if captured
+        assertEquals(Board.Stone.BLANK, board.getStone(5, 6));
+
+        assertFalse(board.playStone(5, 6)); // check if unable to play if dies
+
+        board.playStone(5, 4); // white
+        board.pass();
+        board.playStone(4, 5); // white
+        board.pass();
+        board.playStone(6, 5); // white
+        board.pass();
+        assertEquals(Board.Stone.BLACK, board.getStone(5, 5));
+
+        assertTrue(board.playStone(5, 6)); // white recaptures
+
+        assertEquals(Board.Stone.WHITE, board.getStone(5, 6));
+        assertEquals(Board.Stone.BLANK, board.getStone(5, 5));
+
+        assertFalse(board.playStone(5, 5)); // check if black unable to play if return to previous state
+
+        board.playStone(1, 1);
+        board.playStone(1, 2); // white
+
+        assertTrue(board.playStone(5, 5)); // check if black able to play if moves happened
     }
 }
