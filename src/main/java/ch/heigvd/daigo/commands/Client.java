@@ -5,9 +5,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-import ch.heigvd.daigo.utils.ClientRequest;
-import ch.heigvd.daigo.utils.ServerRequest;
+import ch.heigvd.daigo.utils.ClientRequestCommand;
+import ch.heigvd.daigo.utils.Player;
+import ch.heigvd.daigo.utils.ServerRequestCommand;
 import picocli.CommandLine;
+
+import static ch.heigvd.daigo.utils.ClientRequestCommand.*;
 
 @CommandLine.Command(name = "client", description = "Start the client part of the network game.")
 public class Client implements Callable<Integer> {
@@ -15,7 +18,7 @@ public class Client implements Callable<Integer> {
     private enum ResponseCommand {
         OK,
         ERROR,
-        GAMES,
+        GAME,
     }
 
   @CommandLine.Option(
@@ -29,6 +32,8 @@ public class Client implements Callable<Integer> {
       description = "Port to use (default: ${DEFAULT-VALUE}).",
       defaultValue = "6433")
   protected int port;
+
+  private Player current;
 
   @Override
   public Integer call() {
@@ -49,49 +54,10 @@ public class Client implements Callable<Integer> {
 
           // Run REPL until user quits
           while (!socket.isClosed()) {
-              // Display prompt
-              System.out.print("> ");
-
-              // Read user input
-              String userInput = bsir.readLine();
-
               try {
-                  // Split user input to parse command (also known as message)
-                  String[] userInputParts = userInput.split(" ");
-                  System.out.println(userInputParts[0]);
-                  ClientRequest command = ClientRequest.valueOf(userInputParts[0].toUpperCase());
-
-                  // Prepare request
-                  String request = command.name();
-
-                  switch (command) {
-                      case HELO, JOIN -> {
-                          if (userInputParts.length != 2) {
-                              System.out.println("[Client] Invalid arguments.");
-                              continue;
-                          }
-                          request = " " + userInputParts[1];
-                      }
-                      case CREATE, LIST, PASS, FORFEIT ->  {
-                          if (userInputParts.length != 1) {
-                              System.out.println("ERROR, try again");
-                              continue;
-                          }
-                      }
-                      case STONE ->   {
-                          request = command + " " + userInputParts[1] + " " + userInputParts[2];
-                      }
-                      case EXIT ->   {
-                          request = command.toString();
-                          socket.close();
-                      }
-                  }
-
-                  if (request != null) {
-                      // Send request to server
-                      out.write(request + "\n");
-                      out.flush();
-                  }
+                  System.out.print("> ");
+                  out.write(validatedRequestToSend(bsir.readLine()) + "\n");
+                  out.flush();
               } catch (Exception e) {
                   System.out.println("Invalid command. Please try again.");
                   continue;
@@ -102,12 +68,12 @@ public class Client implements Callable<Integer> {
 
               // If serverResponse is null, the server has disconnected
               if (serverResponse == null) {
-                  socket.close();
+//                  socket.close();
                   continue;
               }
 
               // Split response to parse message (also known as command)
-              String[] serverResponseParts = serverResponse.split(" ", 2);
+              String[] serverResponseParts = serverResponse.split(" ");
 
               ResponseCommand message = null;
               try {
@@ -116,25 +82,22 @@ public class Client implements Callable<Integer> {
                   // Do nothing
               }
 
-              // Handle response from server
+              //Handling the server request
+
+              int errno;
+
               switch (message) {
                   case OK -> {
-                      // As we know from the server implementation, the message is always the second part
-                      String helloMessage = serverResponseParts[1];
-                      System.out.println(helloMessage);
+                      System.out.println("Server is happy !");
                   }
 
                   case ERROR -> {
-                      if (serverResponseParts.length < 2) {
-                          System.out.println("Invalid message. Please try again.");
-                          break;
-                      }
-
-                      String invalidMessage = serverResponseParts[1];
-                      System.out.println(invalidMessage);
+                      errno = Integer.parseInt(serverResponseParts[1]);
                   }
-                  case GAMES -> {
-                      System.out.println(serverResponseParts[1]);
+                  case GAME -> {
+                      boolean victory =  Boolean.parseBoolean(serverResponseParts[1]);
+                      System.out.println(victory ? "Gagné !" : "Perdu.");
+                      socket.close();
                   }
                   case null, default ->
                           System.out.println("Invalid/unknown command sent by server, ignore.");
@@ -146,6 +109,64 @@ public class Client implements Callable<Integer> {
           System.out.println("[Client] Exception: " + e);
       }
       return 0;
+  }
+
+  private static void handleServerRequest(String serverRequest) throws IllegalArgumentException {
+      String[] serverRequestParts = serverRequest.split(" ");
+      ServerRequestCommand command = ServerRequestCommand.valueOf(serverRequestParts[0]);
+      switch (command) {
+          case JOINED -> {
+              System.out.println("[Client] Player " + serverRequestParts[1] + " joined your game!");
+          }
+          case PLAY -> {
+              System.out.println("Allez joue maintenant là !");
+          }
+          case PLAYER_STONE -> {
+              System.out.println("Player played stone on " + serverRequestParts[1] + " " + serverRequestParts[2]);
+          }
+          case PLAYER_PASS -> {
+              System.out.println("Player passed");
+          }
+          case PLAYER_FORFEIT -> {
+              System.out.println("Player forfeited");
+          }
+          case PLAYER_DISCONNECT -> {
+              System.out.println("Player disconnected");
+          }
+      }
+  }
+
+  private static String validatedRequestToSend(String userInput) throws IllegalArgumentException {
+      String[] userInputParts = userInput.split(" ");
+      System.out.println(userInputParts[0]);
+      ClientRequestCommand command = ClientRequestCommand.valueOf(userInputParts[0].toUpperCase());
+
+      switch (command) {
+          case HELO -> {
+              return HELO.name() + userInputParts[1];
+          }
+          case CREATE -> {
+              return CREATE.name();
+          }
+          case LIST -> {
+              return LIST.name();
+          }
+          case JOIN -> {
+              return JOIN.name() +  userInputParts[1];
+          }
+          case STONE -> {
+              return STONE.name() + userInputParts[1] + userInputParts[2];
+          }
+          case PASS -> {
+              return PASS.name();
+          }
+          case FORFEIT ->  {
+              return FORFEIT.name();
+          }
+          default -> {
+              throw new IllegalArgumentException();
+          }
+      }
   }
 
     private static void help() {

@@ -6,9 +6,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import ch.heigvd.daigo.utils.ClientRequest;
+import ch.heigvd.daigo.utils.ClientRequestCommand;
 import ch.heigvd.daigo.utils.Player;
 import picocli.CommandLine;
 
@@ -56,39 +57,9 @@ public class Server implements Callable<Integer> {
                           continue;
                       }
 
+                      String response = "DDD";
+
                       // Split user input to parse command (also known as message)
-                      String[] clientRequestParts = clientRequest.split(" ", 2);
-
-                      ClientRequest command = ClientRequest.valueOf(clientRequestParts[0]);
-
-                      String response = command.name();
-
-                      switch (command) {
-                          case HELO -> {
-                              System.out.println("[Server] HELO ");
-                          }
-                          case CREATE -> {
-                              System.out.println("[Server] create");
-                          }
-                          case LIST -> {
-                              System.out.println("[Server] list");
-                          }
-                          case JOIN -> {
-                              System.out.println("[Server] join");
-                          }
-                          case STONE -> {
-                              System.out.println("[Server] stone");
-                          }
-                          case PASS -> {
-                              System.out.println("[Server] pass");
-                          }
-                          case FORFEIT -> {
-                              System.out.println("[Server] forfeit");
-                          }
-                          case EXIT -> {
-                              System.out.println("[Server] exit");
-                          }
-                      }
 
 //                      switch (command) {
 //                          case JOINED -> {
@@ -129,5 +100,87 @@ public class Server implements Callable<Integer> {
           System.out.println("[Server] IO exception: " + e);
       }
       return 0;
+  }
+
+  public void handleClientRequest(String clientRequest) throws IllegalArgumentException {
+      String[] clientRequestParts = clientRequest.split(" ", 2);
+
+      ClientRequestCommand command = ClientRequestCommand.valueOf(clientRequestParts[0]);
+
+      String response = command.name();
+
+      switch (command) {
+          case HELO -> {
+              String playerName = clientRequestParts[1];
+              if(!new_player(playerName)) {
+                  System.out.println("[Server] Player " + playerName + " already exists");
+              }
+          }
+          case CREATE -> {
+              System.out.println("[Server] create");
+          }
+          case LIST -> {
+              System.out.println("[Server] list");
+          }
+          case JOIN -> {
+              System.out.println("[Server] join");
+          }
+          case STONE -> {
+              System.out.println("[Server] stone");
+          }
+          case PASS -> {
+              System.out.println("[Server] pass");
+          }
+          case FORFEIT -> {
+              System.out.println("[Server] forfeit");
+          }
+          case EXIT -> {
+              System.out.println("[Server] exit");
+          }
+      }
+  }
+
+  Optional<Player> findPlayer(String playerName) {
+    for (Player player : players) {
+        if(player.get_name().equals(playerName))
+          return Optional.of(player);
+    }
+    return Optional.empty();
+  }
+
+  private boolean new_player(String playerName) {
+      for (Player player : players) {
+          if (player.get_name().equals(playerName))
+              return false;
+      }
+      players.add(new Player(playerName));
+      return true;
+  }
+
+  private void create_game(String playerName) {
+      for (Player player : players) {
+          if (player.get_name().equals(playerName)) {
+              player.create_game();
+          }
+      }
+  }
+
+  private List<Player> available_players() {
+      List<Player> available_players = new ArrayList<>();
+      for (Player player : players) {
+          if(player.available())
+              available_players.add(player);
+      }
+      return available_players;
+  }
+
+  private void join_player(String requestPlayerName, String playerNameToJoin) {
+      Optional<Player> requestPlayer = findPlayer(requestPlayerName),
+              playerToJoin = findPlayer(playerNameToJoin);
+
+      if(requestPlayer.isPresent() &&  playerToJoin.isPresent()
+      && requestPlayer.get().available() && playerToJoin.get().available()) {
+          requestPlayer.get().set_opponent(playerToJoin.get());
+      }
   }
 }

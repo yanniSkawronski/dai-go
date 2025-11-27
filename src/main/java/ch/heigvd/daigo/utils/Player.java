@@ -3,25 +3,41 @@ package ch.heigvd.daigo.utils;
 import java.util.Optional;
 
 public class Player {
-    private Integer id;
-    private Optional<Integer> opponent_id;
+    private String name;
+    private Optional<Player> opponent;
+    private boolean inGame;
 
-    public Player(int id, int opponent_id) {
-        this.id = id;
-        this.opponent_id = Optional.of(opponent_id);
+    public Player(String name) {
+        this.name = name;
+        this.opponent = Optional.empty();
+        this.inGame = false;
     }
 
-    public Player(int id) {
-        this.id = id;
-        this.opponent_id = Optional.empty();
+    public void create_game(){
+        if(inGame || opponent.isPresent()) return;
+        this.inGame = true;
     }
 
-    public int get_id() {
-        return id;
+    public String get_name() {
+        return name;
     }
 
-    public void set_opponent(Player opponent) {
-        this.opponent_id = Optional.of(opponent.get_id());
-        opponent.opponent_id = Optional.of(this.id);
+    public boolean available() {
+        return inGame && opponent.isEmpty();
+    }
+
+    public boolean set_opponent(Player other) {
+        if(opponent.isPresent()) return false;
+        if(other.opponent.isPresent()) return false;
+        this.opponent = Optional.of(other);
+        other.opponent = Optional.of(this);
+        return true;
+    }
+
+    public boolean detach_opponent() {
+        if(opponent.isEmpty() || opponent.get().opponent.isEmpty()) return false;
+        opponent.get().opponent = Optional.empty();
+        opponent = Optional.empty();
+        return true;
     }
 }

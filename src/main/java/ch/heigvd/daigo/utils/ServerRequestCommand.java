@@ -1,6 +1,6 @@
 package ch.heigvd.daigo.utils;
 
-public enum ServerRequest {
+public enum ServerRequestCommand {
     JOINED,
     PLAY,
     PLAYER_STONE,

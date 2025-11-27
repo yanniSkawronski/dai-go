@@ -1,6 +1,6 @@
 package ch.heigvd.daigo.utils;
 
-public enum ClientRequest {
+public enum ClientRequestCommand {
     HELO,
     CREATE,
     LIST,
