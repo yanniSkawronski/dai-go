@@ -164,4 +164,27 @@ class BoardTest {
         assertEquals(Board.Stone.BLANK, board.getStone(5, 3));
         assertEquals(Board.Stone.BLACK, board.getStone(4, 3));
     }
+
+    @org.junit.jupiter.api.Test
+    void weirdIllegalMoves() {
+        board.playStone(5, 1);
+        board.playStone(5, 2); // white
+        board.playStone(4, 2);
+        board.playStone(4, 3); // white
+        board.playStone(6, 2);
+        board.playStone(6, 3); // white
+        board.playStone(3, 3);
+        board.playStone(5, 4); // white
+        board.playStone(7, 3);
+        board.pass();
+        board.playStone(4, 4);
+        board.pass();
+        board.playStone(6, 4);
+        board.pass();
+        board.playStone(5, 5);
+
+        System.out.println(board);
+
+        assertFalse(board.playStone(5, 3)); // invalid play
+    }
 }
