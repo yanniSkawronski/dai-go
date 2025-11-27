@@ -290,6 +290,8 @@ public class Board {
 
         // check if the played stone can breathe AND ko rule
         if(!canBreathe(x, y) || Arrays.deepEquals(current, previous)) {
+            if(!canBreathe(x,y)) System.out.println("ILLEGAL: CANNOT BREATHE");
+            else System.out.println("ILLEGAL: KO RULE");
             current[x][y] = 0;
             // restore destroyed enemy stones
             for(int[] point : deletedStones)
@@ -348,5 +350,21 @@ public class Board {
             case 1 -> Stone.BLACK;
             default -> Stone.BLANK;
         };
+    }
+
+    public static void main(String[] args) {
+        Board board = new Board();
+        board.playStone(2,2);
+        board.playStone(2,3);
+        board.playStone(3,1);
+        board.playStone(3,4);
+        board.playStone(4,2);
+        board.playStone(4,3);
+        board.playStone(3,3);
+        System.out.println(board);
+        board.playStone(3,2);
+        System.out.println(board);
+        board.playStone(3,3);
+        System.out.println(board);
     }
 }
