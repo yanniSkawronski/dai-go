@@ -51,21 +51,6 @@ class BoardTest {
 
         assertTrue(board.playStone(5, 6)); // white
         assertEquals(Board.Stone.WHITE, board.getStone(5, 6));
-
-        board.playStone(6, 6);
-        board.pass(); // white
-        board.playStone(4, 6);
-        board.pass(); // white
-        board.playStone(5, 7);
-
-        // check if captured
-        assertEquals(Board.Stone.BLANK, board.getStone(5, 6));
-
-        board.playStone(5, 4); // white
-        board.pass();
-        board.playStone(4, 5); // white
-        board.pass();
-        board.playStone(6, 5); // white
     }
 
     @org.junit.jupiter.api.Test
@@ -145,5 +130,38 @@ class BoardTest {
         assertTrue(board.playStone(5, 6)); //white ok
         board.pass();
         assertFalse(board.playStone(6, 6)); //white not ok
+    }
+
+    @org.junit.jupiter.api.Test
+    void captureMultipleGroups() {
+        board.playStone(2, 2);
+        board.playStone(2, 3); // white
+        board.playStone(3, 2);
+        board.playStone(3, 3); // white
+        board.playStone(5, 2);
+        board.playStone(5, 3); // white
+        board.playStone(1, 3);
+        board.pass();
+        //board.playStone(4, 3);
+        board.playStone(6, 3);
+        board.pass();
+        board.playStone(2, 4);
+        board.pass();
+        board.playStone(3, 4);
+        board.pass();
+        board.playStone(5, 4);
+        board.pass();
+
+        assertEquals(Board.Stone.WHITE, board.getStone(2, 3));
+        assertEquals(Board.Stone.WHITE, board.getStone(3, 3));
+        assertEquals(Board.Stone.WHITE, board.getStone(5, 3));
+        assertEquals(Board.Stone.BLANK, board.getStone(4, 3));
+
+        assertTrue(board.playStone(4, 3)); // black captures
+
+        assertEquals(Board.Stone.BLANK, board.getStone(2, 3));
+        assertEquals(Board.Stone.BLANK, board.getStone(3, 3));
+        assertEquals(Board.Stone.BLANK, board.getStone(5, 3));
+        assertEquals(Board.Stone.BLACK, board.getStone(4, 3));
     }
 }
