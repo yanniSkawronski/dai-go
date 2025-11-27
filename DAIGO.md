@@ -120,7 +120,7 @@ JOIN <name>
 
 ### A player checks if he can play
 
-The client what is the status of the game.
+The client asks what is the status of the game.
 The server answers asking the client to wait for his turn or informs him what happened
 just before.
 
