@@ -264,13 +264,14 @@ public class Board {
     }
 
     /**
-     * Places a stone on the board
-     * @param x X coordinate (lowest is 1)
-     * @param y Y coordinate (lowest is 1)
+     * Places a stone on the board. (1, 1) is at the top left.
+     * @param X horizontal coordinate, starting from the left (lowest is 1)
+     * @param Y vertical coordinate, starting from the top (lowest is 1)
      * @return True if the move is valid, false otherwise
      */
-    public boolean playStone(int x, int y) {
-        if(Math.max(--x,--y) >= current.length || Math.min(x,y) < 0 ||
+    public boolean playStone(int X, int Y) {
+        int x = Y-1, y = X-1;
+        if(Math.max(x,y) >= current.length || Math.min(x,y) < 0 ||
                 current[x][y]!=0 || isFinished)
             return false;
 
@@ -333,5 +334,19 @@ public class Board {
         winner = blackToPlay ? -1 : 1;
         wonByResignation = true;
         return true;
+    }
+
+    public enum Stone {
+        BLACK,
+        WHITE,
+        BLANK
+    }
+
+    public Stone getStone(int X, int Y) {
+        return switch (current[Y - 1][X - 1]) {
+            case -1 -> Stone.WHITE;
+            case 1 -> Stone.BLACK;
+            default -> Stone.BLANK;
+        };
     }
 }
