@@ -13,6 +13,8 @@ by `\n` aka newline character.
 
 The initial connection is established by the client.
 
+All messages are initiated by the client.
+
 After that the client can join the server with a username.
 The server must verify that the username is not
 already taken by another user,
@@ -29,6 +31,9 @@ if yes, allows the player to join.
 
 When 2 clients have joined a game, the server decides who goes first,
 and the clients can start playing on their turn.
+
+A client has to ask the server if it is his turn to play.
+The server informs him of the status of the game.
 
 A client can play a stone, pass or forfeit. If the play is valid,
 the server lets the second player play, otherwise it responds with an error message.
@@ -56,7 +61,8 @@ HELO <name>
 - `OK`: the client
 - `ERROR <code>`: an error occurred,
   the code is an integer among the following list:
-  - 1 - Name already taken
+  - 7 - The client has already identified themselves
+  - 8 - Name already taken
 
 ### Create a new game 
 
@@ -72,7 +78,8 @@ CREATE
 - `OK`: The game has been created and is open to be joined by other players
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-  - 1 - The client is already in a game
+    - 1 - the client has not yet identified himself.
+    - 3 - The client is already in a game
 
 ### List open games
 
@@ -88,6 +95,9 @@ LIST
 - `GAMES <list>`
     - `list` a list of space separated names of players
         which are waiting in a game that is not yet full
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+    - 1 - the client has not yet identified himself.
 
 ### Join an existing game
 
@@ -101,29 +111,18 @@ JOIN <name>
 
 **Response**
 
-- `OK` : game joined succesfully
+- `OK` : game joined successfully
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - The client is already in a game
-    - 2 - The requested game does not exist
+    - 1 - the client has not yet identified himself.
+    - 3 - The client is already in a game
+    - 6 - The requested game does not exist
 
-### A player joins a game
+### A player checks if he can play
 
-The server tells the client that a player joined his game.
-
-**Request**
-```
-JOINED <name>
-```
-- `name` : name of the player that just joined
-
-**Response**
-
-None.
-
-### Get your turn
-
-The server tells the client that it is his turn to play.
+The client what is the status of the game.
+The server answers asking the client to wait for his turn or informs him what happened
+just before.
 
 **Request**
 
@@ -133,7 +132,22 @@ PLAY
 
 **Response**
 
-None.
+- `WAIT` - Waiting on another player to join
+- `START <name>` - another player joined, it is the clients turn to start as black.
+  - `name` - name of the other player
+- `WAIT <name>` - waiting for the other player
+  - `name` - name of the other player
+- `STONE <x> <y>`- the other player played a stone.
+  - `x` : horizontal position on the board, starting from the left
+  - `y` : vertical position on the board, starting from the top
+- `PASS` - the other player passed.
+- `FORFEIT` - the other player forfeited the game, the client wins.
+- `DISCONNECT` - the other player disconnected, the client wins.
+- `RESULT <1|0>` - the game is done, 1 for win or 0 for loss
+- `ERROR <code>` : an error occurred,
+  the code is an integer among the following list:
+  - 1 - the client has not yet identified himself.
+  - 2 - the client is not in a game.
 
 ### Play a stone
 
@@ -152,9 +166,10 @@ STONE <x> <y>
 - `OK` : The stone has been placed on the board successfully.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - The client is not in a game
-    - 2 - It is not the clients turn
-    - 3 - The move is invalid
+    - 1 - the client has not yet identified himself.
+    - 2 - The client is not in a game
+    - 4 - It is not the clients turn
+    - 5 - The move is invalid
 
 ### Pass your turn
 
@@ -171,8 +186,9 @@ PASS
 - `OK` : The client passed the turn successfully.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - The client is not in a game
-    - 2 - It is not the clients turn
+    - 1 - the client has not yet identified himself.
+    - 2 - The client is not in a game
+    - 4 - It is not the clients turn
 
 ### Forfeit the game
 
@@ -189,79 +205,9 @@ FORFEIT
 - `OK` : forfeit was successfull, game has been terminated with a loss for the client.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - The client is not in a game
-
-### Receive stone played
-
-The server informs the client where his opponent played a stone.
-
-**Request**
-
-```
-PLAYER STONE <x> <y>
-```
-- `x` : horizontal position on the board, starting from the left
-- `y` : vertical position on the board, starting from the top
-
-**Response**
-
-None.
-
-### Receive opponent passed
-
-The server informs the client that his opponent passed his turn.
-
-**Request**
-
-```
-PLAYER PASS
-```
-
-**Response**
-
-None.
-
-### Receive opponent forfeit
-
-The server informs the client that his opponent forfeited the game.
-This means the game has been terminated and the client won.
-
-**Request**
-
-```
-PLAYER FORFEIT
-```
-
-**Response**
-
-None.
-
-### Receive opponent disconnect
-
-The server informs the client that his opponent disconnected.
-This means the game has been terminated and the client won.
-
-**Request**
-
-```
-PLAYER DISCONNECT
-```
-
-**Response**
-
-None.
-
-### Game ends
-
-The server informs the client of the result of the game.
-This means the game has been terminated.
-
-**Request**
-
-```
-GAME <result>
-```
-- `result` : `1` for win and `0` for a loss.
+    - 1 - the client has not yet identified himself.
+    - 2 - The client is not in a game
+    - 4 - It is not the clients turn
 
 **Response**
 
