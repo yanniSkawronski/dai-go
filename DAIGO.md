@@ -214,16 +214,5 @@ FORFEIT
 None.
 
 ### Exit the server
-
-The client informs the server that he quits.
-The server should close the connection.
-
-**Request**
-
-```
-EXIT
-```
-
-**Response**
-
-None.
+To exit the server, the client simply disconnects.
+The server then closes the client socket and updates the game, if any he was in.
