@@ -120,4 +120,30 @@ class BoardTest {
 
         assertTrue(board.playStone(5, 5)); // check if black able to play if moves happened
     }
+
+    @org.junit.jupiter.api.Test
+    void captureMultipleStones() {
+        board.playStone(5, 5);
+        board.playStone(6, 6); // white
+        board.playStone(6, 5);
+        board.playStone(5, 6); // white
+        board.playStone(4, 6);
+        board.pass();
+        board.playStone(7, 6);
+        board.pass();
+        board.playStone(5, 7);
+        board.pass();
+
+        assertEquals(Board.Stone.WHITE, board.getStone(5, 6));
+        assertEquals(Board.Stone.WHITE, board.getStone(6, 6));
+
+        board.playStone(6, 7); // black captures
+
+        assertEquals(Board.Stone.BLANK, board.getStone(5, 6));
+        assertEquals(Board.Stone.BLANK, board.getStone(6, 6));
+
+        assertTrue(board.playStone(5, 6)); //white ok
+        board.pass();
+        assertFalse(board.playStone(6, 6)); //white not ok
+    }
 }
