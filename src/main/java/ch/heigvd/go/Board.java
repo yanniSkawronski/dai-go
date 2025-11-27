@@ -182,37 +182,37 @@ public class Board {
         return false;
     }
 
-    private boolean canBreathe(int x, int y, List<int[]> visited) {
+    private boolean canBreathe(int x, int y, int[][] arrayBoard, List<int[]> visited) {
         visited.add(new int[]{x, y});
-        int colour = current[x][y];
+        int colour = arrayBoard[x][y];
         if(colour==0)
             return true;
 
         boolean ret = false;
         for(int[] point : neighbours(x, y)) {
-            if(!containCorrect(visited, point) && current[point[0]][point[1]] != -1*colour)
-                ret = canBreathe(point[0], point[1], visited) || ret;
+            if(!containCorrect(visited, point) && arrayBoard[point[0]][point[1]] != -1*colour)
+                ret = canBreathe(point[0], point[1], arrayBoard, visited) || ret;
         }
         return ret;
     }
-    private boolean canBreathe(int x, int y) {
+    private boolean canBreathe(int x, int y, int[][] arrayBoard) {
         List<int[]> visited = new ArrayList<int[]>();
-        return canBreathe(x, y, visited);
+        return canBreathe(x, y, arrayBoard, visited);
     }
 
-    private void deleteGroup(int x, int y, int colour, List<int[]> deleted) {
-        if(current[x][y]!=colour)
+    private void deleteGroup(int x, int y, int colour, int[][] arrayBoard, List<int[]> deleted) {
+        if(arrayBoard[x][y]!=colour)
             return;
-        current[x][y] = 0;
+        arrayBoard[x][y] = 0;
         deleted.add(new int[]{x, y});
         for(int[] point : neighbours(x, y)) {
-            deleteGroup(point[0], point[1], colour, deleted);
+            deleteGroup(point[0], point[1], colour, arrayBoard, deleted);
         }
     }
-    private List<int[]> deleteGroup(int x, int y) {
+    private List<int[]> deleteGroup(int x, int y, int[][] arrayBoard) {
         List<int[]> deleted = new ArrayList<int[]>();
-        if(current[x][y]!=0)
-            deleteGroup(x, y, current[x][y], deleted);
+        if(arrayBoard[x][y]!=0)
+            deleteGroup(x, y, arrayBoard[x][y], arrayBoard, deleted);
         return deleted;
     }
 
@@ -263,6 +263,26 @@ public class Board {
         return blackScore;
     }
 
+    private List<int[]> placeStoneOnBoard(int x, int y, int playing, int[][] arrayBoard) {
+        //Warning : here, x and y refers to the position from the
+        //developpers' POV, so [0][0] is at the top left and
+        // x is the horizontal axis.
+        // (x,y) is assumed to be empty
+        // this function does not check if the placed stone is legal.
+        //it justs places the stone and delete the killed stones.
+        arrayBoard[x][y] = playing;
+
+        // check if nearby enemy stones can breathe
+        // if not, we destroy them and save their positions
+        List<int[]> deletedStones = new ArrayList<int[]>();
+        for(int[] point : neighbours(x, y)) {
+            if(arrayBoard[point[0]][point[1]] == -1*playing && !canBreathe(point[0], point[1], arrayBoard))
+                deletedStones.addAll(deleteGroup(point[0], point[1], arrayBoard));
+        }
+
+        return deletedStones;
+    }
+
     /**
      * Places a stone on the board. (1, 1) is at the top left.
      * @param X horizontal coordinate, starting from the left (lowest is 1)
@@ -272,26 +292,24 @@ public class Board {
     public boolean playStone(int X, int Y) {
         int x = Y-1, y = X-1;
         if(Math.max(x,y) >= current.length || Math.min(x,y) < 0 ||
-                current[x][y]!=0 || isFinished)
+                current[x][y]!=0 || isFinished) {
+            if(current[x][y]!=0) System.out.println(X + "," + Y + " ILLEGAL: NON-EMPTY SPACE");
+            else System.out.println(X + "," + Y + " ILLEGAL: OUT OF THE BOARD");
             return false;
+        }
 
         consecutivePasses = 0;
         int playing = blackToPlay ? 1 : -1;
 
         current[x][y] = playing;
 
-        // check if nearby enemy stones can breathe
-        // if not, we destroy them and save their positions
-        List<int[]> deletedStones = new ArrayList<int[]>();
-        for(int[] point : neighbours(x, y)) {
-            if(current[point[0]][point[1]] == -1*playing && !canBreathe(point[0], point[1]))
-                deletedStones.addAll(deleteGroup(point[0], point[1]));
-        }
+        // we place the stone and remove the killed stones
+        List<int[]> deletedStones = placeStoneOnBoard(x, y, playing, current);
 
         // check if the played stone can breathe AND ko rule
-        if(!canBreathe(x, y) || Arrays.deepEquals(current, previous)) {
-            if(!canBreathe(x,y)) System.out.println("ILLEGAL: CANNOT BREATHE");
-            else System.out.println("ILLEGAL: KO RULE");
+        if(!canBreathe(x, y, current) || Arrays.deepEquals(current, previous)) {
+            if(!canBreathe(x,y, current)) System.out.println(X + "," + Y + " ILLEGAL: SUICIDE");
+            else System.out.println(X + "," + Y + " ILLEGAL: KO RULE");
             current[x][y] = 0;
             // restore destroyed enemy stones
             for(int[] point : deletedStones)
@@ -300,7 +318,7 @@ public class Board {
         } else { // if not, the move is valid
             blackToPlay = !blackToPlay;
             if(previousMove != null)
-                previous[previousMove[0]][previousMove[1]] = -1*playing;
+                placeStoneOnBoard(previousMove[0], previousMove[1], -1*playing, previous);
             previousMove = new int[]{x, y};
             return true;
         }
@@ -315,6 +333,8 @@ public class Board {
         if(isFinished)
             return false;
         blackToPlay = !blackToPlay;
+        if(previousMove != null)
+            placeStoneOnBoard(previousMove[0], previousMove[1], blackToPlay ? 1 :-1 , previous);
         previousMove = null;
         ++consecutivePasses;
         if(consecutivePasses>1) {
@@ -351,20 +371,5 @@ public class Board {
             default -> Stone.BLANK;
         };
     }
-
-    public static void main(String[] args) {
-        Board board = new Board();
-        board.playStone(2,2);
-        board.playStone(2,3);
-        board.playStone(3,1);
-        board.playStone(3,4);
-        board.playStone(4,2);
-        board.playStone(4,3);
-        board.playStone(3,3);
-        System.out.println(board);
-        board.playStone(3,2);
-        System.out.println(board);
-        board.playStone(3,3);
-        System.out.println(board);
-    }
+    
 }
