@@ -293,8 +293,6 @@ public class Board {
         int x = Y-1, y = X-1;
         if(Math.max(x,y) >= current.length || Math.min(x,y) < 0 ||
                 current[x][y]!=0 || isFinished) {
-            if(current[x][y]!=0) System.out.println(X + "," + Y + " ILLEGAL: NON-EMPTY SPACE");
-            else System.out.println(X + "," + Y + " ILLEGAL: OUT OF THE BOARD");
             return false;
         }
 
@@ -308,8 +306,6 @@ public class Board {
 
         // check if the played stone can breathe AND ko rule
         if(!canBreathe(x, y, current) || Arrays.deepEquals(current, previous)) {
-            if(!canBreathe(x,y, current)) System.out.println(X + "," + Y + " ILLEGAL: SUICIDE");
-            else System.out.println(X + "," + Y + " ILLEGAL: KO RULE");
             current[x][y] = 0;
             // restore destroyed enemy stones
             for(int[] point : deletedStones)
@@ -371,5 +367,5 @@ public class Board {
             default -> Stone.BLANK;
         };
     }
-    
+
 }
