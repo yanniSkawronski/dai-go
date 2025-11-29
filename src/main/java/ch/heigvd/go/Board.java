@@ -16,6 +16,20 @@ public class Board {
     private boolean blackToPlay;
 
     /**
+     * Return the previous move played.
+     * @return {X, Y}. X horizontal coordinate, starting from the left (lowest is 1).
+     * Y vertical coordinate, starting from the top (lowest is 1).
+     * (-1, -1) means PASS, (-2, -2) means the game just started
+     */
+    public int[] getPreviousMove() {
+        // x = Y-1, y = X-1;
+        if(consecutivePasses>0)
+            return new int[]{-1, -1};
+        if(previousMove==null)
+            return new int[]{-2,-2};
+        return new int[]{previousMove[1]+1, previousMove[0]+1};
+    }
+    /**
      * The additional points for white.
      * Can be negative.
      */
