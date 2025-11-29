@@ -266,7 +266,7 @@ public class Board {
     private List<int[]> placeStoneOnBoard(int x, int y, int playing, int[][] arrayBoard) {
         //Warning : here, x and y refers to the position from the
         //developpers' POV, so [0][0] is at the top left and
-        // x is the horizontal axis.
+        // x is the vertical axis.
         // (x,y) is assumed to be empty
         // this function does not check if the placed stone is legal.
         //it justs places the stone and delete the killed stones.
