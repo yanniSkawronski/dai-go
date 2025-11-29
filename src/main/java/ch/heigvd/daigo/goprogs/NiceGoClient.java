@@ -133,7 +133,7 @@ public class NiceGoClient {
                                     } else if(serverOutput.startsWith("WAIT")) {
                                         System.out.println("You play as white\n");
                                         System.out.println(board);
-                                        System.out.println("Waiting for "+opponentName);
+                                        System.out.println("\n\n\nWaiting for "+opponentName);
                                         colour = -1;
                                     } else
                                         throw new RuntimeException("DD "+serverOutput);
@@ -170,7 +170,7 @@ public class NiceGoClient {
                             } else {
                                 System.out.println("You play as white\n");
                                 System.out.println(board);
-                                System.out.println("Waiting for "+opponentName);
+                                System.out.println("\n\n\nWaiting for "+opponentName);
                                 colour = -1;
                             }
                         } else
@@ -291,7 +291,7 @@ public class NiceGoClient {
 
                             if(board!=null && !board.isFinished()) {
                                 System.out.println("\n"+board);
-                                System.out.println("\nWaiting for " + opponentName);
+                                System.out.println("\n\n\nWaiting for " + opponentName);
                             }
 
                         }
