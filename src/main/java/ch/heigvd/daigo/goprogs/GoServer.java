@@ -9,9 +9,13 @@ import java.util.concurrent.*;
 import java.util.Random;
 
 public class GoServer {
-    private static final int PORT = 1919;
+    private final int PORT;
 
-    public static void main(String[] args) {
+    public GoServer(int port) {
+        this.PORT = port;
+    }
+
+    public void launch() {
         System.out.println("Server starting...");
 
         try(ServerSocket serverSocket = new ServerSocket(PORT);
@@ -26,7 +30,7 @@ public class GoServer {
         } catch (IOException e) { System.out.println("Error : " + e); }
     }
 
-    static class ClientHandler implements Runnable {
+    private class ClientHandler implements Runnable {
         private static int maxId = 0;
         private static final CopyOnWriteArrayList<ClientHandler> clients = new CopyOnWriteArrayList<>();
 

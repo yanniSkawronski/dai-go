@@ -1,6 +1,8 @@
 package ch.heigvd.daigo.commands;
 
 import java.util.concurrent.Callable;
+
+import ch.heigvd.daigo.goprogs.NiceGoClient;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "client", description = "Start the client part of the network game.")
@@ -20,7 +22,8 @@ public class Client implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    throw new UnsupportedOperationException(
-        "Please remove this exception and implement this method.");
+      NiceGoClient niceGoClient = new NiceGoClient(host, port);
+      niceGoClient.launch();
+      return 0;
   }
 }
