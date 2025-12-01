@@ -16,7 +16,7 @@ public class GoServer {
     }
 
     public void launch() {
-        System.out.println("Server starting...");
+        System.out.println("heiGO Server starting...");
 
         try(ServerSocket serverSocket = new ServerSocket(PORT);
             ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor(); ) {
