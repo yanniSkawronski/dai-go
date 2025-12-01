@@ -4,7 +4,7 @@
 
 heiGO is a Java program to play the ancient boardgame of Go. It ships with a client with a user-friendly CLI
 interface that allows a user to connect, choose a username, and play some epic Go games with other
-connected users. The player takes into account illegal moves, game end through two consecutive passes,
+connected users. The program takes into account illegal moves, game end through two consecutive passes,
 and automatic counting of the score. It also ships with a server able to handle multiple clients
 through multithreading.
 
