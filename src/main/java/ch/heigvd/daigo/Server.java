@@ -1,4 +1,4 @@
-package ch.heigvd.daigo.goprogs;
+package ch.heigvd.daigo;
 
 import ch.heigvd.go.Board;
 import java.io.*;
@@ -8,10 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 import java.util.Random;
 
-public class GoServer {
+public class Server {
     private final int PORT;
 
-    public GoServer(int port) {
+    public Server(int port) {
         this.PORT = port;
     }
 

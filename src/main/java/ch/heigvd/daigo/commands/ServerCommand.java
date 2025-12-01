@@ -2,11 +2,11 @@ package ch.heigvd.daigo.commands;
 
 import java.util.concurrent.Callable;
 
-import ch.heigvd.daigo.goprogs.GoServer;
+import ch.heigvd.daigo.Server;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "server", description = "Start the server part of the network game.")
-public class Server implements Callable<Integer> {
+public class ServerCommand implements Callable<Integer> {
 
   @CommandLine.Option(
       names = {"-p", "--port"},
@@ -16,8 +16,8 @@ public class Server implements Callable<Integer> {
 
   @Override
   public Integer call() {
-      GoServer goServer = new GoServer(port);
-      goServer.launch();
+      Server server = new Server(port);
+      server.launch();
       return 0;
   }
 }

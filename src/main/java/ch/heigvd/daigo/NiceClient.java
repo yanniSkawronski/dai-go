@@ -1,4 +1,4 @@
-package ch.heigvd.daigo.goprogs;
+package ch.heigvd.daigo;
 
 import ch.heigvd.go.Board;
 import java.io.*;
@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class NiceGoClient {
+public class NiceClient {
     private final String host;
     private final int PORT;
 
@@ -16,7 +16,7 @@ public class NiceGoClient {
     private int colour;
     private boolean sleepWarned;
 
-    public NiceGoClient(String host, int port) {
+    public NiceClient(String host, int port) {
         this.host = host;
         this.PORT = port;
         hasCreatedGame = false;
