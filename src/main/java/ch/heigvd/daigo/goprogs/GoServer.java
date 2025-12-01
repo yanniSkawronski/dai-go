@@ -247,6 +247,18 @@ public class GoServer {
             return "OK";
         }
 
+        String disconnect(String[] userInputs) {
+            System.out.println(name +" has disconnected.");
+            if(currentGame!=null)
+                System.out.println("Game " + name + " vs " + opponent.name + " has ended.");
+            hasDisconnected = true;
+            hasIdentified = false;
+            hasCreatedGame = false;
+            currentGame = null;
+            opponent = null;
+            return "OK";
+        }
+
         @Override
         public void run() {
             try(clientSocket;
@@ -287,21 +299,17 @@ public class GoServer {
 
                         case "FORFEIT" -> serverOutput = forfeit(userInputs);
 
-                        case "DISCONNECT" -> {
-                            System.out.println(name +" has disconnected.");
-                            if(currentGame!=null)
-                                System.out.println("Game " + name + " vs " + opponent.name + " has ended.");
-                            hasDisconnected = true;
-                            hasIdentified = false;
-                            hasCreatedGame = false;
-                            currentGame = null;
-                            opponent = null;
-                        }
+                        case "DISCONNECT" -> serverOutput = disconnect(userInputs);
 
                     }
-                    if(!hasDisconnected) {
+                    try {
                         out.write(serverOutput + "\n");
                         out.flush();
+                    } catch (IOException e) {
+                        if(hasDisconnected)
+                            System.out.println("Warning: couldn't send disconnection acknowledgement");
+                        else
+                            throw new RuntimeException(e);
                     }
                 }
 

@@ -159,6 +159,8 @@ public class Board {
         sb.append('\n');
         if(consecutivePasses>0)
             sb.append(blackToPlay ? white : black).append(" passed\n");
+        else
+            sb.append("\n");
         if(isFinished) {
             sb.append("Game over!\n");
             if(winner==0) {

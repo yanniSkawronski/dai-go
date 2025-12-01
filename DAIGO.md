@@ -53,7 +53,7 @@ The client sends a hello message to the server indicating the client's username
 **Request**
 
 ```
-HELO <name>
+HELLO <name>
 ```
 - `name`: the name of the client
 
@@ -143,7 +143,7 @@ PLAY
 - `PASS` - the other player passed.
 - `FORFEIT` - the other player forfeited the game, the client wins.
 - `DISCONNECT` - the other player disconnected, the client wins.
-- `RESULT <1|0>` - the game is done, 1 for win or 0 for loss
+- `RESULT <1|0|-1>` - the game is done: 1 for win, 0 for draw, -1 for loss.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
   - 1 - the client has not yet identified himself.
@@ -209,12 +209,21 @@ FORFEIT
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
 
+### Disconnect
+
+The client tells the server he disconnects.
+
+```
+DISCONNECT
+```
+
 **Response**
 
-None.
+- `OK` : the server acknowledges the disconnection.
 
 ### Exit the server
-To exit the server, the client simply disconnects.
+To exit the server, the client simply disconnects, or announce his
+disconnection with `DISCONNECT`.
 The server then closes the client socket and updates the game, if any he was in.
 
 ### Unknown Message

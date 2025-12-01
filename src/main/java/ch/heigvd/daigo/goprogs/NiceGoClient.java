@@ -35,9 +35,6 @@ public class NiceGoClient {
             out.write(userInput + "\n");
         out.flush();
 
-        if(userInput.equals("DISCONNECT"))
-            return "";
-
         String ret = in.readLine();
         if(ret==null)
             throw new RuntimeException("Server has unexpectedly disconnected.");
@@ -155,7 +152,11 @@ public class NiceGoClient {
                         }
                         case "4" -> {
                             mustQuit = true;
-                            sendToServer("DISCONNECT", out, in);
+                            serverOutput = sendToServer("DISCONNECT", out, in);
+                            if(!serverOutput.equals("OK"))
+                                System.out.println("Warning: server has not acknowledged the disconnection.");
+                            else
+                                System.out.println("Server has acknowledged the disconnection.");
                         }
 
                     }
