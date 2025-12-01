@@ -2,13 +2,14 @@
 
 ## What does it do?
 
-heiGO is a Java program to play the ancient boardgame of Go. It ships with a client with a user-friendly CLI
-interface that allows a user to connect, choose a username, and play some epic Go games with other
-connected users. The program takes into account illegal moves, game end through two consecutive passes,
-and automatic counting of the score. It also ships with a server able to handle multiple clients
-through multithreading.
+Tired of having some bloated games with intense graphics that slow down your PC?
+Want to experience playing the board game Go with your friends in simple textual
+vizualisation? Then heiGO is all you need! Its purpose is to launch a
+server that can host multiple go games, and also some clients, so people can
+interact with the server, and actually play the game with others, isn't that cool?
 
-The rules of the game can be found [here](https://www.britgo.org/intro/intro2.html).
+You can check [this](https://www.britgo.org/intro/intro2.html) out for
+how to play the game.
 
 
 ## Installation
