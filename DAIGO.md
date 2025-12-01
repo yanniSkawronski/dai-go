@@ -53,7 +53,7 @@ The client sends a hello message to the server indicating the client's username
 **Request**
 
 ```
-HELLO <name>
+HELO <name>
 ```
 - `name`: the name of the client
 
@@ -209,21 +209,9 @@ FORFEIT
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
 
-### Disconnect
-
-The client tells the server he disconnects.
-
-```
-DISCONNECT
-```
-
-**Response**
-
-- `OK` : the server acknowledges the disconnection.
 
 ### Exit the server
-To exit the server, the client simply disconnects, or announce his
-disconnection with `DISCONNECT`.
+To exit the server, the client simply disconnects.
 The server then closes the client socket and updates the game, if any he was in.
 
 ### Unknown Message

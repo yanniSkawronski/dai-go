@@ -152,11 +152,6 @@ public class NiceGoClient {
                         }
                         case "4" -> {
                             mustQuit = true;
-                            serverOutput = sendToServer("DISCONNECT", out, in);
-                            if(!serverOutput.equals("OK"))
-                                System.out.println("Warning: server has not acknowledged the disconnection.");
-                            else
-                                System.out.println("Server has acknowledged the disconnection.");
                         }
 
                     }
@@ -236,7 +231,7 @@ public class NiceGoClient {
                                 opponentName = null;
                                 // the player is no longer in game
                             }
-                            case "DISCONNECTED" -> {
+                            case "DISCONNECT" -> {
                                 System.out.println("\n"+opponentName+" has disconnected, you won!\n");
                                 board = null;
                                 opponentName = null;

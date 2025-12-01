@@ -29,15 +29,9 @@ public class GoClient {
                 userInput = scanner.nextLine();
                 out.write(userInput + "\n");
                 out.flush();
-                if(userInput.equals("DISCONNECT"))
-                    break;
             }
             if(serverOutput==null)
                 System.out.println("Server has unexpectedly disconnected.");
-            else if(serverOutput.equals("OK"))
-                System.out.println("Server has acknowledged the disconnection.");
-            else
-                System.out.println("Warning: server has not acknowledged the disconnection.");
 
         } catch (IOException e) {
             System.out.println("Error : " + e);
