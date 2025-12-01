@@ -7,16 +7,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class NiceGoClient {
-    private static final int PORT = 1919;
+    private final String host;
+    private final int PORT;
 
-    static boolean hasCreatedGame = false;
-    static String opponentName = null;
-    static Board board = null;
-    static int colour = 0;
+    private boolean hasCreatedGame;
+    private String opponentName;
+    private Board board;
+    private int colour;
+    private boolean sleepWarned;
 
-    static boolean isInGame() {return hasCreatedGame || board!=null;}
+    public NiceGoClient(String host, int port) {
+        this.host = host;
+        this.PORT = port;
+        hasCreatedGame = false;
+        opponentName = null;
+        board = null;
+        colour = 0;
+        sleepWarned = false;
+    }
 
-    static String sendToServer(String userInput, BufferedWriter out, BufferedReader in) throws IOException {
+    private boolean isInGame() {return hasCreatedGame || board!=null;}
+
+    private String sendToServer(String userInput, BufferedWriter out, BufferedReader in) throws IOException {
         if(userInput.charAt(userInput.length()-1)=='\n')
             out.write(userInput);
         else
@@ -32,8 +44,7 @@ public class NiceGoClient {
         return ret;
     }
 
-    static boolean sleepWarned = false;
-    static void waitOneSecond() {
+    private void waitOneSecond() {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -44,10 +55,10 @@ public class NiceGoClient {
         }
     }
 
-    public static void main(String[] args) {
+    public void launch() {
         System.out.println("Nice Go Client starting...");
 
-        try (Socket socket = new Socket("localhost", PORT);
+        try (Socket socket = new Socket(host, PORT);
              OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
              BufferedWriter out = new BufferedWriter(osw);
              InputStreamReader isr = new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8);

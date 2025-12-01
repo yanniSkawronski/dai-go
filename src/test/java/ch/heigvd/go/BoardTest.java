@@ -183,8 +183,6 @@ class BoardTest {
         board.pass();
         board.playStone(5, 5);
 
-        System.out.println(board);
-
         assertFalse(board.playStone(5, 3)); // invalid play
     }
 
