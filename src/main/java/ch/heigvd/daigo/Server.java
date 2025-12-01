@@ -161,7 +161,7 @@ public class Server {
             if(opponent.hasDisconnected) {
                 currentGame = null;
                 opponent = null;
-                return "DISCONNECTED";
+                return "DISCONNECT";
             }
             if(currentGame.isFinished()) {
                 int winner = currentGame.winner();
@@ -299,17 +299,22 @@ public class Server {
 
                         case "FORFEIT" -> serverOutput = forfeit(userInputs);
 
-                        case "DISCONNECT" -> serverOutput = disconnect(userInputs);
+                        case "DISCONNECT" -> {
+                            System.out.println(name +" has disconnected.");
+                            if(currentGame!=null)
+                                System.out.println("Game " + name + " vs " + opponent.name + " has ended.");
+                            hasDisconnected = true;
+                            hasIdentified = false;
+                            hasCreatedGame = false;
+                            currentGame = null;
+                            opponent = null;
+                        }
 
                     }
-                    try {
+
+                    if(!hasDisconnected) {
                         out.write(serverOutput + "\n");
                         out.flush();
-                    } catch (IOException e) {
-                        if(hasDisconnected)
-                            System.out.println("Warning: couldn't send disconnection acknowledgement");
-                        else
-                            throw new RuntimeException(e);
                     }
                 }
 
