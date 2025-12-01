@@ -1,4 +1,4 @@
-package ch.heigvd.daigo;
+package ch.heigvd.daigo.server;
 
 public enum ServerError {
     UNKNOWN_MESSAGE (-1),

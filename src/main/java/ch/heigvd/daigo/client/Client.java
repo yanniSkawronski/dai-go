@@ -1,4 +1,4 @@
-package ch.heigvd.daigo;
+package ch.heigvd.daigo.client;
 
 import java.io.*;
 import java.net.Socket;

@@ -2,7 +2,7 @@ package ch.heigvd.daigo.commands;
 
 import java.util.concurrent.Callable;
 
-import ch.heigvd.daigo.NiceClient;
+import ch.heigvd.daigo.client.NiceClient;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "client", description = "Start the client part of the network game.")

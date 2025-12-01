@@ -2,7 +2,7 @@ package ch.heigvd.daigo.commands;
 
 import java.util.concurrent.Callable;
 
-import ch.heigvd.daigo.Server;
+import ch.heigvd.daigo.server.Server;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "server", description = "Start the server part of the network game.")

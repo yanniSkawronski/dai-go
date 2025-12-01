@@ -1,4 +1,4 @@
-package ch.heigvd.daigo;
+package ch.heigvd.daigo.client;
 
 import ch.heigvd.go.Board;
 import java.io.*;
