@@ -9,6 +9,19 @@ interact with the server, and actually play the game with others, isn't that coo
 You can check the Go rules [here](https://www.britgo.org/intro/intro2.html) if you don't know them.
 
 
+## Table of contents
+
+1. [Installing the application](#installing-the-application)
+   - [From source](#from-source)
+   - [With the Docker image](#with-the-docker-image)
+2. [Usage](#usage)
+    - [Launching the server](#launching-the-server)
+    - [Launching the client](#launching-the-client)
+3. [Contributing](#contributing)
+4. [Sources](#sources)
+5. [Authors](#authors)
+
+
 ## Installing the application
 
 There are two ways possible :
