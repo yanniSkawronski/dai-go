@@ -1,4 +1,4 @@
-package ch.heigvd.daigo.goprogs;
+package ch.heigvd.daigo.client;
 
 import ch.heigvd.go.Board;
 import java.io.*;
@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class NiceGoClient {
+public class NiceClient {
     private final String host;
     private final int PORT;
 
@@ -16,7 +16,7 @@ public class NiceGoClient {
     private int colour;
     private boolean sleepWarned;
 
-    public NiceGoClient(String host, int port) {
+    public NiceClient(String host, int port) {
         this.host = host;
         this.PORT = port;
         hasCreatedGame = false;
@@ -34,9 +34,6 @@ public class NiceGoClient {
         else
             out.write(userInput + "\n");
         out.flush();
-
-        if(userInput.equals("DISCONNECT"))
-            return "";
 
         String ret = in.readLine();
         if(ret==null)
@@ -155,7 +152,6 @@ public class NiceGoClient {
                         }
                         case "4" -> {
                             mustQuit = true;
-                            sendToServer("DISCONNECT", out, in);
                         }
 
                     }
@@ -235,7 +231,7 @@ public class NiceGoClient {
                                 opponentName = null;
                                 // the player is no longer in game
                             }
-                            case "DISCONNECTED" -> {
+                            case "DISCONNECT" -> {
                                 System.out.println("\n"+opponentName+" has disconnected, you won!\n");
                                 board = null;
                                 opponentName = null;

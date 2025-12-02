@@ -2,11 +2,11 @@ package ch.heigvd.daigo.commands;
 
 import java.util.concurrent.Callable;
 
-import ch.heigvd.daigo.goprogs.NiceGoClient;
+import ch.heigvd.daigo.client.NiceClient;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "client", description = "Start the client part of the network game.")
-public class Client implements Callable<Integer> {
+public class ClientCommand implements Callable<Integer> {
 
   @CommandLine.Option(
       names = {"-H", "--host"},
@@ -17,13 +17,13 @@ public class Client implements Callable<Integer> {
   @CommandLine.Option(
       names = {"-p", "--port"},
       description = "Port to use (default: ${DEFAULT-VALUE}).",
-      defaultValue = "6433")
+      defaultValue = "1919")
   protected int port;
 
   @Override
   public Integer call() {
-      NiceGoClient niceGoClient = new NiceGoClient(host, port);
-      niceGoClient.launch();
+      NiceClient niceClient = new NiceClient(host, port);
+      niceClient.launch();
       return 0;
   }
 }
