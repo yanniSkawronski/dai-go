@@ -34,7 +34,10 @@ class Game {
      * @return is the game finished (win or forfeit)
      */
     public synchronized boolean isFinished() {
-        return (this.board.isFinished() || this.forfeited);
+        return (this.board.isFinished() || this.forfeited || (
+                this.started && (this.white == null || this.black == null)
+            )
+        );
     }
 
     /**
@@ -121,7 +124,7 @@ class Game {
             );
         }
 
-        if (checkTurn(isBlack)) {
+        if (!checkTurn(isBlack)) {
             return new GameStatus(opponentName(isBlack), false);
         }
 
@@ -138,6 +141,20 @@ class Game {
     }
 
     /**
+     * Can the player make a move, aka is it his turn and is the game running
+     * @param playerName Name of the player
+     * @return true if player can play else false
+     */
+    private boolean canPlay(String playerName) {
+        if (!started || isFinished()) {
+            return false;
+        }
+
+        boolean isBlack = amIBlack(playerName);
+        return checkTurn(isBlack);
+    }
+
+    /**
      * Play a stone
      * @param playerName Name of the player
      * @param x horizontal position
@@ -145,15 +162,9 @@ class Game {
      * @return Optional empty if stone was successfull otherwise corresponding ServerError
      */
     synchronized Optional<ServerError> stone(String playerName, int x, int y) {
-        if (!started) {
-            return Optional.of(ServerError.NOT_CLIENTS_TURN); //TODO replace by Game not yet started
-        }
-
-        boolean isBlack = amIBlack(playerName);
-        if (checkTurn(isBlack)) {
+        if (!canPlay(playerName)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
-
         if (!this.board.playStone(x, y)) {
             return Optional.of(ServerError.INVALID_MOVE);
         }
@@ -167,12 +178,7 @@ class Game {
      * @return Optional empty if pass was successfull otherwise corresponding ServerError
      */
     synchronized Optional<ServerError> pass(String playerName) {
-        if (!started) {
-            return Optional.of(ServerError.NOT_CLIENTS_TURN); //TODO replace by Game not yet started
-        }
-
-        boolean isBlack = amIBlack(playerName);
-        if (checkTurn(isBlack)) {
+        if (!canPlay(playerName)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
 
@@ -189,12 +195,7 @@ class Game {
      * @return Optional empty if pass was successfull otherwise corresponding ServerError
      */
     synchronized Optional<ServerError> forfeit(String playerName) {
-        if (!started) {
-            return Optional.of(ServerError.NOT_CLIENTS_TURN); //TODO replace by Game not yet started
-        }
-
-        boolean isBlack = amIBlack(playerName);
-        if (checkTurn(isBlack)) {
+        if (!canPlay(playerName)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
 
@@ -204,12 +205,6 @@ class Game {
 
         this.forfeited = true;
 
-        if (isBlack) {
-            this.black = null;
-        } else {
-            this.white = null;
-        }
-
         return Optional.empty();
     }
 
@@ -218,6 +213,10 @@ class Game {
      * @param playerName Name of the player
      */
     synchronized void disconnect(String playerName) {
+        if (!started || isFinished()) {
+            return;
+        }
+
         boolean isBlack = amIBlack(playerName);
         if (isBlack) {
             this.black = null;
