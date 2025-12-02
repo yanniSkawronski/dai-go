@@ -77,6 +77,10 @@ Contributions via issues and pull requests are welcome. You don't need to build 
 
 If you want details about the application protocol, see [](DAIGO.md).
 
+## Sources
+
+We used the TCP programming practical work template ([link here](https://github.com/heig-vd-dai-course/heig-vd-dai-course-java-tcp-programming-practical-content-template)) as base project.
+
 ## Authors
 
 - [Yanni Skawronski](https://github.com/yanniSkawronski)
