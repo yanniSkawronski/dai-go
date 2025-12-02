@@ -1,11 +1,11 @@
-package ch.heigvd.daigo.goprogs;
+package ch.heigvd.daigo.client;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class GoClient {
+public class Client {
     private static final int PORT = 1919;
 
     public static void main(String[] args) {
@@ -29,8 +29,6 @@ public class GoClient {
                 userInput = scanner.nextLine();
                 out.write(userInput + "\n");
                 out.flush();
-                if(userInput.equals("DISCONNECT"))
-                    break;
             }
             if(serverOutput==null)
                 System.out.println("Server has unexpectedly disconnected.");
