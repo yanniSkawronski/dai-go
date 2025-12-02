@@ -1,6 +1,8 @@
 package ch.heigvd.daigo.client;
 
 import ch.heigvd.go.Board;
+import ch.heigvd.daigo.server.ServerError;
+import ch.heigvd.daigo.server.ServerReply;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -316,7 +318,7 @@ public class NiceClient {
                             }
                             if(board.winner()!=colour*serverResult)
                                 throw new RuntimeException("Local and server result don't match");
-                            System.out.println(board);
+                            System.out.println("\n"+board);
                             if(board.winner()==colour)
                                 System.out.println("You won! :D\n");
                             else if(board.winner()== -1*colour)
