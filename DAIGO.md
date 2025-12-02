@@ -189,6 +189,7 @@ PASS
     - 1 - the client has not yet identified himself.
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
+    - 5 - The move is invalid
 
 ### Forfeit the game
 
@@ -208,7 +209,7 @@ FORFEIT
     - 1 - the client has not yet identified himself.
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
-
+    - 5 - The move is invalid
 
 ### Exit the server
 To exit the server, the client simply disconnects.
