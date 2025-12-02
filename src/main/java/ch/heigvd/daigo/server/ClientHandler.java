@@ -9,6 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Handles a single client using the DAIGO protocol
+ */
 class ClientHandler implements Runnable {
     private static final CopyOnWriteArrayList<Game> availableGames = new CopyOnWriteArrayList<>();
     private static final CopyOnWriteArrayList<String> clients = new CopyOnWriteArrayList<>();
@@ -22,6 +25,11 @@ class ClientHandler implements Runnable {
         this.clientSocket = s;
     }
 
+    /**
+     * Add a client to the list of clients, making sure there are no 2 clients with the same name
+     * @param name Name of the client
+     * @return false if name is taken else true
+     */
     private synchronized static boolean add_client(String name) {
         for (String client : clients)
             if (name.equals(client))
@@ -30,6 +38,11 @@ class ClientHandler implements Runnable {
         return true;
     }
 
+    /**
+     * handle HELO message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String hello(String[] userInputs) {
         if (userInputs.length != 2)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -45,6 +58,11 @@ class ClientHandler implements Runnable {
         return ServerReply.OK.toString();
     }
 
+    /**
+     * handle CREATE message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String create(String[] userInputs) {
         if (userInputs.length != 1)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -64,6 +82,11 @@ class ClientHandler implements Runnable {
         return ServerReply.OK.toString();
     }
 
+    /**
+     * handle LIST message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String list(String[] userInputs) {
         if (userInputs.length != 1)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -77,6 +100,11 @@ class ClientHandler implements Runnable {
         return sb.toString();
     }
 
+    /**
+     * handle JOIN message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String join(String[] userInputs) {
         if (userInputs.length != 2)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -107,6 +135,11 @@ class ClientHandler implements Runnable {
         return ServerReply.OK.toString();
     }
 
+    /**
+     * handle PLAY message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String play(String[] userInputs) {
         if (userInputs.length != 1)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -120,6 +153,11 @@ class ClientHandler implements Runnable {
         return status.toString();
     }
 
+    /**
+     * handle STONE message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String stone(String[] userInputs) {
         if (userInputs.length != 3)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -141,6 +179,11 @@ class ClientHandler implements Runnable {
                 .orElse(ServerReply.OK.toString());
     }
 
+    /**
+     * handle PASS message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String pass(String[] userInputs) {
         if (userInputs.length != 1)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -155,6 +198,11 @@ class ClientHandler implements Runnable {
                 .orElse(ServerReply.OK.toString());
     }
 
+    /**
+     * handle FORFEIT message
+     * @param userInputs message split by spaces
+     * @return response
+     */
     String forfeit(String[] userInputs) {
         if (userInputs.length != 1)
             return ServerError.UNKNOWN_MESSAGE.response();
@@ -173,6 +221,9 @@ class ClientHandler implements Runnable {
                 .orElse(ServerReply.OK.toString());
     }
 
+    /**
+     * handle disconnect, remove player from game and from clients list
+     */
     void disconnect() {
         if (this.game != null)
             this.game.disconnect(this.name);
