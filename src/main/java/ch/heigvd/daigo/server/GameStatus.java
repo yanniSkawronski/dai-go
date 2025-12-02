@@ -39,6 +39,10 @@ class GameStatus {
         this.lastStoneY = lastStoneY;
     }
 
+    public boolean isStart() {
+        return this.reply == ServerReply.START;
+    }
+
     @Override
     public String toString() {
         return switch (this.reply) {

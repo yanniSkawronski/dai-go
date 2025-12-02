@@ -35,4 +35,8 @@ public enum ServerError {
             default -> INVALID_ERROR;
         };
     }
+
+    public String response() {
+        return "ERROR " + this.code;
+    }
 }

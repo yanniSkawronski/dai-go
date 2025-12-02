@@ -1,245 +1,167 @@
 package ch.heigvd.daigo.server;
 
+import ch.heigvd.daigo.client.ClientRequest;
 import ch.heigvd.go.Board;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 class ClientHandler implements Runnable {
-    private static int maxId = 0;
-    private static final CopyOnWriteArrayList<ClientHandler> clients = new CopyOnWriteArrayList<>();
-
-    static synchronized int getId() {
-        return ++maxId;
-    }
+    private static final CopyOnWriteArrayList<Game> availableGames = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<String> clients = new CopyOnWriteArrayList<>();
 
     private final Socket clientSocket;
-    private final int id;
 
-    private String name = "";
-    boolean hasIdentified = false;
-    private int colour = 0; // 1 for black, -1 for white
-    private ClientHandler opponent = null;
-    private Board currentGame = null;
-    boolean hasCreatedGame = false;
-    boolean hasForfeited = false;
-    boolean hasDisconnected = false;
-
-    boolean mustPlay() {
-        if (currentGame == null)
-            return false;
-        int boardPlayer = this.currentGame.blackToPlay() ? 1 : -1;
-        return !currentGame.isFinished() && this.colour == boardPlayer;
-    }
-
-    boolean isInGame() {
-        return hasCreatedGame || this.currentGame != null;
-    }
+    private String name;
+    Game game = null;
 
     public ClientHandler(Socket s) {
         this.clientSocket = s;
-        clients.add(this);
-        this.id = getId();
+    }
+
+    private synchronized static boolean add_client(String name) {
+        for (String client : clients)
+            if (name.equals(client))
+                return false;
+        clients.add(name);
+        return true;
     }
 
     String hello(String[] userInputs) {
         if (userInputs.length != 2)
-            return "ERROR -1";
-        if (hasIdentified)
-            return "ERROR 7";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name != null)
+            return ServerError.ALREADY_IDENTIFIED.response();
 
-        for (ClientHandler client : clients)
-            if (client.hasIdentified && userInputs[1].equalsIgnoreCase(client.name))
-                return "ERROR 8";
+        if (!add_client(userInputs[1]))
+            return ServerError.NAME_TAKEN.response();
 
-        name = userInputs[1];
-        hasIdentified = true;
+        this.name = userInputs[1];
 
-        System.out.println("New player: " + name);
-        return "OK";
+        System.out.println("Client Hello " + this.name);
+        return ServerReply.OK.toString();
     }
 
     String create(String[] userInputs) {
         if (userInputs.length != 1)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
-        if (isInGame())
-            return "ERROR 3";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
+        if (this.game != null)
+            return ServerError.CLIENT_INGAME.response();
 
-        hasCreatedGame = true;
-        return "OK";
+        this.game = new Game(this.name);
+        availableGames.add(this.game);
+
+        return ServerReply.OK.toString();
     }
 
     String list(String[] userInputs) {
         if (userInputs.length != 1)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
 
-        StringBuilder sb = new StringBuilder("GAMES");
-        for (ClientHandler client : clients)
-            if (client.hasIdentified && client.hasCreatedGame)
-                sb.append(" ").append(client.name);
+        StringBuilder sb = new StringBuilder(ServerReply.GAMES.toString());
+        for (Game game : availableGames) {
+            sb.append(" ").append(game.getHostName());
+        }
         return sb.toString();
     }
 
     String join(String[] userInputs) {
         if (userInputs.length != 2)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
-        if (isInGame())
-            return "ERROR 3";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
+        if (this.game != null)
+            return ServerError.CLIENT_INGAME.response();
 
-        for (ClientHandler client : clients)
-            if (client.hasIdentified && client.hasCreatedGame
-                    && this != client
-                    && userInputs[1].equalsIgnoreCase(client.name)) {
-                opponent = client;
-                client.opponent = this;
-                currentGame = new Board();
-                opponent.currentGame = currentGame;
-                hasCreatedGame = false;
-                opponent.hasCreatedGame = false;
-                hasForfeited = false;
-                opponent.hasForfeited = false;
-
-                // assign the colours
-                Random random = new Random();
-                int choice = random.nextInt(2);
-
-                if (choice == 0) {
-                    colour = 1;
-                    opponent.colour = -1;
-                } else {
-                    colour = -1;
-                    opponent.colour = 1;
-                }
-
-                System.out.println("New game: " + name + " vs " + opponent.name);
-                return "OK";
+        Game new_game = null;
+        for (Game game : availableGames) {
+            if (game.getHostName().equals(userInputs[1])) {
+                new_game = game;
+                break;
             }
+        }
+        if (new_game == null || !availableGames.remove(new_game))
+            return ServerError.GAME_NOT_FOUND.response();
 
-        return "ERROR 6";
+        this.game = new_game;
+
+        this.game.joinGame(this.name);
+
+        return ServerReply.OK.toString();
     }
 
     String play(String[] userInputs) {
         if (userInputs.length != 1)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
-        if (!isInGame())
-            return "ERROR 2";
-        if (currentGame == null)
-            return "WAIT";
-        if (opponent.hasForfeited) {
-            currentGame = null;
-            opponent = null;
-            return "FORFEIT";
-        }
-        if (opponent.hasDisconnected) {
-            currentGame = null;
-            opponent = null;
-            return "DISCONNECT";
-        }
-        if (currentGame.isFinished()) {
-            int winner = currentGame.winner();
-            currentGame = null;
-            opponent = null;
-            if (winner == colour)
-                return "RESULT 1";
-            else if (winner == -1 * colour)
-                return "RESULT -1";
-            else
-                return "RESULT 0";
-        }
-        if (!mustPlay())
-            return "WAIT " + opponent.name;
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
+        if (this.game == null)
+            return ServerError.CLIENT_NOT_INGAME.response();
 
-        // if this is reached, then it's the player's turn
-        // we get the previous move.
+        GameStatus status = this.game.status(this.name);
 
-        int X = currentGame.getPreviousMove()[0];
-        int Y = currentGame.getPreviousMove()[1];
-
-        if (X == -2)
-            return "START " + opponent.name;
-        if (X == -1)
-            return "PASS";
-
-        return "STONE " + X + " " + Y;
+        return status.toString();
     }
 
     String stone(String[] userInputs) {
         if (userInputs.length != 3)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
-        if (!isInGame())
-            return "ERROR 2";
-        if (!mustPlay())
-            return "ERROR 4";
-        int X, Y;
-        try {
-            X = Integer.parseInt(userInputs[1]);
-            Y = Integer.parseInt(userInputs[2]);
-        } catch (NumberFormatException e) {
-            return "ERROR -1";
-        }
-        if (!currentGame.playStone(X, Y))
-            return "ERROR 5";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
+        if (this.game == null)
+            return ServerError.CLIENT_NOT_INGAME.response();
 
-        return "OK";
+        int x, y;
+        try {
+            x = Integer.parseInt(userInputs[1]);
+            y = Integer.parseInt(userInputs[2]);
+        } catch (NumberFormatException e) {
+            return ServerError.UNKNOWN_MESSAGE.response();
+        }
+        Optional<ServerError> res = this.game.stone(this.name, x, y);
+
+        return res.map(ServerError::response)
+                .orElse(ServerReply.OK.toString());
     }
 
     String pass(String[] userInputs) {
         if (userInputs.length != 1)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
-        if (!isInGame())
-            return "ERROR 2";
-        if (!mustPlay())
-            return "ERROR 4";
-        if (!currentGame.pass())
-            return "UNKNOWN ERROR: CANNOT PASS";
-        if (currentGame.isFinished())
-            System.out.println("Game " + name + " vs " + opponent.name + " has ended.");
-        return "OK";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
+        if (this.game == null)
+            return ServerError.CLIENT_NOT_INGAME.response();
+
+        Optional<ServerError> res = this.game.pass(this.name);
+
+        return res.map(ServerError::response)
+                .orElse(ServerReply.OK.toString());
     }
 
     String forfeit(String[] userInputs) {
         if (userInputs.length != 1)
-            return "ERROR -1";
-        if (!hasIdentified)
-            return "ERROR 1";
-        if (!isInGame())
-            return "ERROR 2";
-        if (!mustPlay())
-            return "ERROR 4";
+            return ServerError.UNKNOWN_MESSAGE.response();
+        if (this.name == null)
+            return ServerError.UNIDENTIFIED_CLIENT.response();
+        if (this.game == null)
+            return ServerError.CLIENT_NOT_INGAME.response();
 
-        System.out.println("Game " + name + " vs " + opponent.name + " has ended by forfeit.");
-        hasForfeited = true;
-        opponent = null;
-        currentGame = null;
+        Optional<ServerError> res = this.game.forfeit(this.name);
 
-        return "OK";
+        return res.map(ServerError::response)
+                .orElse(ServerReply.OK.toString());
     }
 
-    String disconnect(String[] userInputs) {
-        System.out.println(name + " has disconnected.");
-        if (currentGame != null)
-            System.out.println("Game " + name + " vs " + opponent.name + " has ended.");
-        hasDisconnected = true;
-        hasIdentified = false;
-        hasCreatedGame = false;
-        currentGame = null;
-        opponent = null;
-        return "OK";
+    void disconnect() {
+        if (this.game != null)
+            this.game.disconnect(this.name);
     }
 
     @Override
@@ -252,53 +174,33 @@ class ClientHandler implements Runnable {
 
             String userInput;
 
-            while (!hasDisconnected) {
+            while (!clientSocket.isClosed()) {
 
                 userInput = in.readLine();
-                if (userInput == null)
-                    userInput = "DISCONNECT";
-
-                String serverOutput = "ERROR -1";
-                // IMPORTANT
-                // Do not include de \n at the end of serverOutput,
-                // it will be added later
+                if (userInput == null) {
+                    this.disconnect();
+                    clientSocket.close();
+                    continue;
+                }
 
                 String[] userInputs = userInput.split(" ");
-                switch (userInputs[0]) {
-
-                    case "HELLO" -> serverOutput = hello(userInputs);
-
-                    case "CREATE" -> serverOutput = create(userInputs);
-
-                    case "LIST" -> serverOutput = list(userInputs);
-
-                    case "JOIN" -> serverOutput = join(userInputs);
-
-                    case "PLAY" -> serverOutput = play(userInputs);
-
-                    case "STONE" -> serverOutput = stone(userInputs);
-
-                    case "PASS" -> serverOutput = pass(userInputs);
-
-                    case "FORFEIT" -> serverOutput = forfeit(userInputs);
-
-                    case "DISCONNECT" -> {
-                        System.out.println(name + " has disconnected.");
-                        if (currentGame != null)
-                            System.out.println("Game " + name + " vs " + opponent.name + " has ended.");
-                        hasDisconnected = true;
-                        hasIdentified = false;
-                        hasCreatedGame = false;
-                        currentGame = null;
-                        opponent = null;
-                    }
-
+                String response;
+                try {
+                    response = switch (ClientRequest.valueOf(userInputs[0])) {
+                        case HELO -> hello(userInputs);
+                        case CREATE -> create(userInputs);
+                        case LIST -> list(userInputs);
+                        case JOIN -> join(userInputs);
+                        case PLAY -> play(userInputs);
+                        case STONE -> stone(userInputs);
+                        case PASS -> pass(userInputs);
+                        case FORFEIT -> forfeit(userInputs);
+                    };
+                } catch (IllegalArgumentException e) {
+                    response = ServerError.UNKNOWN_MESSAGE.response();
                 }
-
-                if (!hasDisconnected) {
-                    out.write(serverOutput + "\n");
-                    out.flush();
-                }
+                out.write(response + '\n');
+                out.flush();
             }
 
         } catch (IOException e) {

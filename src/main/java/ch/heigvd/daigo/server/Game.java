@@ -17,7 +17,11 @@ class Game {
         this.board = new Board();
     }
 
-    synchronized boolean joinGame(String guestPlayer) {
+    public synchronized String getHostName() {
+        return black;
+    }
+
+    synchronized void joinGame(String guestPlayer) {
         Random random = new Random();
         boolean isBlack = random.nextBoolean();
 
@@ -26,11 +30,9 @@ class Game {
         if (isBlack) {
             this.white = this.black;
             this.black = guestPlayer;
-            return true;
         }
         else {
             this.white = guestPlayer;
-            return false;
         }
     }
 
@@ -42,7 +44,12 @@ class Game {
         return isBlack ? white : black;
     }
 
-    synchronized GameStatus status(boolean isBlack) {
+    private synchronized boolean amIBlack(String name) {
+        return this.black.equals(name);
+    }
+
+    synchronized GameStatus status(String playerName) {
+        boolean isBlack = amIBlack(playerName);
         if (!started) {
             return new GameStatus();
         }
@@ -79,7 +86,8 @@ class Game {
         }
     }
 
-    synchronized Optional<ServerError> stone(boolean isBlack, int x, int y) {
+    synchronized Optional<ServerError> stone(String playerName, int x, int y) {
+        boolean isBlack = amIBlack(playerName);
         if (checkTurn(isBlack)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
@@ -91,7 +99,8 @@ class Game {
         return Optional.empty();
     }
 
-    synchronized Optional<ServerError> pass(boolean isBlack) {
+    synchronized Optional<ServerError> pass(String playerName) {
+        boolean isBlack = amIBlack(playerName);
         if (checkTurn(isBlack)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
@@ -103,7 +112,8 @@ class Game {
         return Optional.empty();
     }
 
-    synchronized Optional<ServerError> forfeit(boolean isBlack) {
+    synchronized Optional<ServerError> forfeit(String playerName) {
+        boolean isBlack = amIBlack(playerName);
         if (checkTurn(isBlack)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
@@ -123,7 +133,8 @@ class Game {
         return Optional.empty();
     }
 
-    synchronized void disconnect(boolean isBlack) {
+    synchronized void disconnect(String playerName) {
+        boolean isBlack = amIBlack(playerName);
         if (isBlack) {
             this.black = null;
         } else {
