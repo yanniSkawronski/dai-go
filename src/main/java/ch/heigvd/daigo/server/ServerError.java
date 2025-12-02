@@ -1,5 +1,9 @@
 package ch.heigvd.daigo.server;
 
+/**
+ * One of the possible Errors in the DAIGO protocol
+ * with an additional INVALID_ERROR
+ */
 public enum ServerError {
     UNKNOWN_MESSAGE (-1),
     UNIDENTIFIED_CLIENT(1),
@@ -19,8 +23,16 @@ public enum ServerError {
         this.code = code;
     }
 
+    /**
+     * @return error code corresponding to the error
+     */
     public int code() { return code; }
 
+    /**
+     * Decodes an error code into a ServerError
+     * @param code error code
+     * @return Error corresponding to the error code or INVALID_ERROR
+     */
     public static ServerError fromCode(int code) {
         return switch (code) {
             case -1 -> UNKNOWN_MESSAGE;
@@ -36,6 +48,10 @@ public enum ServerError {
         };
     }
 
+    /**
+     * Returns the error as a valid DAIGO protocol response
+     * @return response message
+     */
     public String response() {
         return "ERROR " + this.code;
     }
