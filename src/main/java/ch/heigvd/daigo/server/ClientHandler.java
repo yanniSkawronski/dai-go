@@ -177,6 +177,9 @@ class ClientHandler implements Runnable {
         if (this.game != null)
             this.game.disconnect(this.name);
         this.game = null;
+        if (this.name != null) {
+            clients.removeIf(name -> name.equals(this.name));
+        }
     }
 
     @Override
