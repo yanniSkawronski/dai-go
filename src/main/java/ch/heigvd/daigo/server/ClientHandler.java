@@ -225,8 +225,10 @@ class ClientHandler implements Runnable {
      * handle disconnect, remove player from game and from clients list
      */
     void disconnect() {
-        if (this.game != null)
+        if (this.game != null) {
             this.game.disconnect(this.name);
+            availableGames.removeIf(game -> game == this.game);
+        }
         this.game = null;
         if (this.name != null) {
             clients.removeIf(name -> name.equals(this.name));

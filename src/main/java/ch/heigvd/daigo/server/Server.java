@@ -28,7 +28,7 @@ public class Server {
             ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor(); ) {
             while(!serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.printf("Connection from %s" , clientSocket.getInetAddress());
+                System.out.printf("Connection from: %s\n" , clientSocket.getInetAddress());
 
                 executor.submit(new ClientHandler(clientSocket));
 
