@@ -1,0 +1,41 @@
+@startuml
+skinparam noteTextAlignment center
+skinparam sequenceMessageAlign direction
+autonumber
+
+title "DAIGO Protocol - Login Errors"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+== Join the server ==
+
+note over c1, c2
+The socket is instanciated and the connection is
+automatically established.
+end note
+
+c1 -> s : Establish Connection
+c1 <--> s : Connection Established
+c1 -> s : HELO alice
+s -> c1 : OK
+
+== Join with a duplicate name ==
+
+c2 -> s : Establish Connection
+c2 <--> s : Connection Established
+c2 -> s : HELO alice
+s -> c2 : ERROR 8
+
+== Try to join when already joined ==
+
+c1 -> s : HELO carl
+s -> c1 : ERROR 7
+
+== Try to interact without joining ==
+
+c2 -> s : LIST
+s -> c2 : ERROR 1
+
+@enduml
