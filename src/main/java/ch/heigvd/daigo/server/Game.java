@@ -5,6 +5,9 @@ import ch.heigvd.go.Board;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * A thread safe Game of Go with 2 players
+ */
 class Game {
     private String black;
     private String white;
@@ -12,20 +15,37 @@ class Game {
     private boolean started = false;
     private boolean forfeited = false;
 
+    /**
+     * @param hostPlayer the player which created the game
+     */
     public Game(String hostPlayer) {
         this.black = hostPlayer;
         this.board = new Board();
     }
 
+    /**
+     * @return Returns the hosts name if the game has not yet started, otherwise returns the black players name.
+     */
     public synchronized String getHostName() {
         return black;
     }
 
+    /**
+     * @return is the game finished (win or forfeit)
+     */
     public synchronized boolean isFinished() {
         return (this.board.isFinished() || this.forfeited);
     }
 
+    /**
+     * A player joins a game which is not yet started. The black player is determined randomly and players can start playing.
+     * @param guestPlayer player which joins the game
+     * @throws IllegalStateException if the game has already started and is full
+     */
     synchronized void joinGame(String guestPlayer) {
+        if (this.started) {
+            throw new IllegalStateException("Game has already started");
+        }
         Random random = new Random();
         boolean isBlack = random.nextBoolean();
 
@@ -40,23 +60,50 @@ class Game {
         }
     }
 
+    /**
+     * Check if it is the players turn
+     * @param isBlack is player black
+     * @return true if it is the players turn
+     */
     private boolean checkTurn(boolean isBlack) {
         return isBlack == board.blackToPlay();
     }
 
+    /**
+     * @param isBlack is player black
+     * @return The opponents name
+     */
     private String opponentName(boolean isBlack) {
         return isBlack ? white : black;
     }
 
-    private synchronized boolean amIBlack(String name) {
-        return name.equals(this.black);
+    /**
+     * Check which player is the player with the corresponding name
+     * @param name Name of the player
+     * @return true if the player is the black player
+     * @throws IllegalArgumentException if the name is none of the 2 players, this should not happen
+     */
+    private boolean amIBlack(String name) {
+        if (name.equals(this.black))
+            return true;
+        else if (name.equals(this.white)) {
+            return false;
+        }
+        //this should not happen, so we throw anyway
+        throw new IllegalArgumentException("Invalid player name! Something is very wrong");
     }
 
+    /**
+     * Get the status of a game from the point of view of a player
+     * @param playerName Name of the player
+     * @return a GameStatus of the game for the player asking
+     */
     synchronized GameStatus status(String playerName) {
-        boolean isBlack = amIBlack(playerName);
         if (!started) {
             return new GameStatus();
         }
+
+        boolean isBlack = amIBlack(playerName);
 
         String otherPlayer = opponentName(isBlack);
         if (otherPlayer == null) {
@@ -90,7 +137,18 @@ class Game {
         }
     }
 
+    /**
+     * Play a stone
+     * @param playerName Name of the player
+     * @param x horizontal position
+     * @param y vertical position
+     * @return Optional empty if stone was successfull otherwise corresponding ServerError
+     */
     synchronized Optional<ServerError> stone(String playerName, int x, int y) {
+        if (!started) {
+            return Optional.of(ServerError.NOT_CLIENTS_TURN); //TODO replace by Game not yet started
+        }
+
         boolean isBlack = amIBlack(playerName);
         if (checkTurn(isBlack)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
@@ -103,7 +161,16 @@ class Game {
         return Optional.empty();
     }
 
+    /**
+     * Pass your turn
+     * @param playerName Name of the player
+     * @return Optional empty if pass was successfull otherwise corresponding ServerError
+     */
     synchronized Optional<ServerError> pass(String playerName) {
+        if (!started) {
+            return Optional.of(ServerError.NOT_CLIENTS_TURN); //TODO replace by Game not yet started
+        }
+
         boolean isBlack = amIBlack(playerName);
         if (checkTurn(isBlack)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
@@ -116,7 +183,16 @@ class Game {
         return Optional.empty();
     }
 
+    /**
+     * Forfeit the game
+     * @param playerName Name of the player
+     * @return Optional empty if pass was successfull otherwise corresponding ServerError
+     */
     synchronized Optional<ServerError> forfeit(String playerName) {
+        if (!started) {
+            return Optional.of(ServerError.NOT_CLIENTS_TURN); //TODO replace by Game not yet started
+        }
+
         boolean isBlack = amIBlack(playerName);
         if (checkTurn(isBlack)) {
             return Optional.of(ServerError.NOT_CLIENTS_TURN);
@@ -137,6 +213,10 @@ class Game {
         return Optional.empty();
     }
 
+    /**
+     * Disconnect the player
+     * @param playerName Name of the player
+     */
     synchronized void disconnect(String playerName) {
         boolean isBlack = amIBlack(playerName);
         if (isBlack) {
