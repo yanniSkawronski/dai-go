@@ -50,8 +50,13 @@ class ClientHandler implements Runnable {
             return ServerError.UNKNOWN_MESSAGE.response();
         if (this.name == null)
             return ServerError.UNIDENTIFIED_CLIENT.response();
-        if (this.game != null)
-            return ServerError.CLIENT_INGAME.response();
+        if (this.game != null) {
+            if (this.game.isFinished()) {
+                this.game = null;
+            } else {
+                return ServerError.CLIENT_INGAME.response();
+            }
+        }
 
         this.game = new Game(this.name);
         availableGames.add(this.game);
@@ -77,8 +82,13 @@ class ClientHandler implements Runnable {
             return ServerError.UNKNOWN_MESSAGE.response();
         if (this.name == null)
             return ServerError.UNIDENTIFIED_CLIENT.response();
-        if (this.game != null)
-            return ServerError.CLIENT_INGAME.response();
+        if (this.game != null) {
+            if (this.game.isFinished()) {
+                this.game = null;
+            } else {
+                return ServerError.CLIENT_INGAME.response();
+            }
+        }
 
         Game new_game = null;
         for (Game game : availableGames) {
@@ -155,6 +165,10 @@ class ClientHandler implements Runnable {
 
         Optional<ServerError> res = this.game.forfeit(this.name);
 
+        if (res.isEmpty()) {
+            this.game = null;
+        }
+
         return res.map(ServerError::response)
                 .orElse(ServerReply.OK.toString());
     }
@@ -162,6 +176,7 @@ class ClientHandler implements Runnable {
     void disconnect() {
         if (this.game != null)
             this.game.disconnect(this.name);
+        this.game = null;
     }
 
     @Override

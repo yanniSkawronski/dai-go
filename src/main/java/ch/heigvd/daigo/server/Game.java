@@ -21,6 +21,10 @@ class Game {
         return black;
     }
 
+    public synchronized boolean isFinished() {
+        return (this.board.isFinished() || this.forfeited);
+    }
+
     synchronized void joinGame(String guestPlayer) {
         Random random = new Random();
         boolean isBlack = random.nextBoolean();
@@ -45,7 +49,7 @@ class Game {
     }
 
     private synchronized boolean amIBlack(String name) {
-        return this.black.equals(name);
+        return name.equals(this.black);
     }
 
     synchronized GameStatus status(String playerName) {
