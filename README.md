@@ -34,7 +34,7 @@ You can check the Go rules [here](https://www.britgo.org/intro/intro2.html) if y
 
 The daigo appplication protocol defines a simple way to play a game of Go over TCP.
 
-For more details, please check out the specification: [DAIGO Applicaiton protocol](./DAIGO.md)
+For more details, please check out the specification: [DAIGO Applicaiton protocol](./doc/DAIGO_Protocol.md)
 
 ## Installing the application
 
