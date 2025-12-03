@@ -417,7 +417,7 @@ public class NiceClient {
             System.out.println("Error: " + e);
         }
 
-        System.out.println(" Client stopping...");
+        System.out.println("Client stopping...");
 
     }
 }
