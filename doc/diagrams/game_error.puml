@@ -1,0 +1,31 @@
+@startuml
+skinparam noteTextAlignment center
+skinparam sequenceMessageAlign direction
+autonumber
+
+title "DAIGO Protocol - Game Errors"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+note over c1, c2
+The 2 clients have joined the server as alice and bob,
+and have already joined the same game.
+end note
+
+== Playing out of Turn ==
+
+c1 -> s : PLAY
+s -> c1 : WAIT bob
+c1 -> s : STONE 1 4
+s -> c1 : ERROR 4
+
+== Playing an Invalid Move ==
+
+c2 -> s : STONE 3 3
+s -> c2 : OK
+c1 -> s : STONE 3 3
+s -> c1 : ERROR 5
+
+@enduml

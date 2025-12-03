@@ -230,3 +230,7 @@ On an unknown message, the server answers with an error.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
     - -1 - Unknown message received.
+
+## Examples
+
+![simple example](doc/diagrams/simple.png)
