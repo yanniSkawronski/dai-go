@@ -63,7 +63,7 @@ $ java -jar target/dai-go*.jar server [-p=<port>]
 
 If you pulled the Docker image :
 ```sh
-$ docker run --rm ghcr.io/yanniskawronski/dai-go server -H=<host> [-p=<port>]
+$ docker run --rm -p 1919:1919 ghcr.io/yanniskawronski/dai-go server [-p=<port>]
 ```
 
 `<port>` is the port the server will listen to. By default, it is the port 1919.
@@ -86,9 +86,26 @@ $ docker run --rm ghcr.io/yanniskawronski/dai-go client -H=<host> [-p=<port>]
 
 ## Contributing
 
-Contributions via issues and pull requests are welcome. You don't need to build and push yourself a new Docker image (actually you can't). Once your pull request has been accepted, it will automatically build and publish one, via Github Actions.
+Contributions via issues and pull requests are welcome.
 
 If you want details about the application protocol, see [](DAIGO.md).
+
+### Build Docker image and push it to Github Container Registry
+
+To build the Docker image, when in project folder :
+
+```sh
+$ docker build -t dai-go .
+```
+
+To push the Image (you need to be logged in to Github Container Registry) :
+
+```sh
+$ docker tag dai-go ghcr.io/yanniskawronski/dai-go:<tag>
+$ docker push ghcr.io/yanniskawronski/dai-go:<tag>
+```
+
+`<tag>` is the tag you want to put to your image.
 
 ## Sources
 
