@@ -1,26 +1,40 @@
 # DAIGO
 
-Tired of having some bloated games with intense graphics that slow down your PC?
-Want to experience playing the board game Go with your friends in simple textual
-visualisation? Then heiGO is all you need! Its purpose is to launch a
-server that can host multiple go games, and also some clients, so people can
-interact with the server, and actually play the game with others, isn't that cool?
+The DAIGO (heiGO) project is both a CLI client and a server made to
+play a game of Go over the internet.
+They use the [DAIGO](#daigo-application-protocol)
+protocol.
+
+I you wanna enjoy quick game of Go with your friends on the CLI,
+please [install](#installing-the-application) the app
+and enjoy!
 
 You can check the Go rules [here](https://www.britgo.org/intro/intro2.html) if you don't know them.
 
 
 ## Table of contents
 
-1. [Installing the application](#installing-the-application)
-   - [From source](#from-source)
-   - [With the Docker image](#with-the-docker-image)
-2. [Usage](#usage)
-    - [Launching the server](#launching-the-server)
-    - [Launching the client](#launching-the-client)
-3. [Contributing](#contributing)
-4. [Sources](#sources)
-5. [Authors](#authors)
+<!-- TOC -->
+* [DAIGO](#daigo)
+  * [Table of contents](#table-of-contents)
 
+  * [Installing the application](#installing-the-application)
+    * [From source](#from-source)
+    * [With the Docker image](#with-the-docker-image)
+  * [Usage](#usage)
+    * [Launching the server](#launching-the-server)
+    * [Launching the client](#launching-the-client)
+  * [Contributing](#contributing)
+    * [Build Docker image and push it to Github Container Registry](#build-docker-image-and-push-it-to-github-container-registry)
+  * [Sources](#sources)
+  * [Authors](#authors)
+<!-- TOC -->
+
+## DAIGO application protocol
+
+The daigo appplication protocol defines a simple way to play a game of Go over TCP.
+
+For more details, please check out the specification: [DAIGO Applicaiton protocol](./DAIGO.md)
 
 ## Installing the application
 
@@ -63,7 +77,7 @@ $ java -jar target/dai-go*.jar server [-p=<port>]
 
 If you pulled the Docker image :
 ```sh
-$ docker run --rm -p 1919:1919 ghcr.io/yanniskawronski/dai-go server [-p=<port>]
+$ docker run --rm -p 1919:<port> ghcr.io/yanniskawronski/dai-go server [-p=<port>]
 ```
 
 `<port>` is the port the server will listen to. By default, it is the port 1919.
