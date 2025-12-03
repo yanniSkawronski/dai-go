@@ -284,6 +284,7 @@ public class NiceClient {
         //first we wait for the move
         while(output.reply==ServerReply.WAIT) {
             waitOneSecond();
+            System.out.print(".");
             output = communicator.send(ClientRequest.PLAY);
         }
 
@@ -291,7 +292,7 @@ public class NiceClient {
     }
 
     public void launch() {
-        System.out.println("heiGO Client starting...");
+        System.out.println("Client starting...");
 
         try (Socket socket = new Socket(host, PORT);
              OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
@@ -416,7 +417,7 @@ public class NiceClient {
             System.out.println("Error: " + e);
         }
 
-        System.out.println("heiGO Client stopping...");
+        System.out.println(" Client stopping...");
 
     }
 }
