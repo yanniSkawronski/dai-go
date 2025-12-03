@@ -14,6 +14,8 @@ public enum ServerError {
     GAME_NOT_FOUND(6),
     ALREADY_IDENTIFIED(7),
     NAME_TAKEN(8),
+    GAME_NOT_STARTED(9),
+    GAME_FINISHED(10),
 
     INVALID_ERROR(0);
 
@@ -44,6 +46,8 @@ public enum ServerError {
             case 6 -> GAME_NOT_FOUND;
             case 7 -> ALREADY_IDENTIFIED;
             case 8 -> NAME_TAKEN;
+            case 9 -> GAME_NOT_STARTED;
+            case 10 -> GAME_FINISHED;
             default -> INVALID_ERROR;
         };
     }

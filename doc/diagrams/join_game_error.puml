@@ -1,0 +1,61 @@
+@startuml
+skinparam noteTextAlignment center
+skinparam sequenceMessageAlign direction
+autonumber
+
+title "DAIGO Protocol - Game Create or Join Errors"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+== Join the server ==
+
+note over c1, c2
+The socket is instanciated and the connection is
+automatically established.
+end note
+
+c1 -> s : Establish Connection
+c1 <--> s : Connection Established
+c1 -> s : HELO alice
+s -> c1 : OK
+
+c2 -> s : Establish Connection
+c2 <--> s : Connection Established
+c2 -> s : HELO bob
+s -> c2 : OK
+
+== Create a game ==
+
+c1 -> s : CREATE
+s -> c1 : OK
+
+== List games ==
+
+c2 -> s : LIST
+s -> c2 : GAMES alice
+
+== Create game when in game ==
+
+c1 -> s : CREATE
+s -> c1 : ERROR 3
+
+== Join Game ==
+
+c2 -> s : JOIN ted
+s -> c2 : ERROR 6
+c2 -> s : JOIN alice
+s -> c2 : OK
+
+== List Games ==
+
+note over s, c2
+The list of available games is empty
+since alice's game was joined by bob.
+end note
+
+c2 -> s : LIST
+s -> c2 : GAMES
+
+@enduml

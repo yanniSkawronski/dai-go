@@ -61,8 +61,8 @@ HELO <name>
 - `OK`: the client
 - `ERROR <code>`: an error occurred,
   the code is an integer among the following list:
-  - 7 - The client has already identified themselves
-  - 8 - Name already taken
+    - 7 - The client has already identified themselves
+    - 8 - Name already taken
 
 ### Create a new game 
 
@@ -78,7 +78,7 @@ CREATE
 - `OK`: The game has been created and is open to be joined by other players
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - the client has not yet identified himself.
+    - 1 - The client has not yet identified himself.
     - 3 - The client is already in a game
 
 ### List open games
@@ -97,7 +97,7 @@ LIST
         which are waiting in a game that is not yet full
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - the client has not yet identified himself.
+    - 1 - The client has not yet identified himself.
 
 ### Join an existing game
 
@@ -114,7 +114,7 @@ JOIN <name>
 - `OK` : game joined successfully
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - the client has not yet identified himself.
+    - 1 - The client has not yet identified himself.
     - 3 - The client is already in a game
     - 6 - The requested game does not exist
 
@@ -146,8 +146,8 @@ PLAY
 - `RESULT <1|0|-1>` - the game is done: 1 for win, 0 for draw, -1 for loss.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-  - 1 - the client has not yet identified himself.
-  - 2 - the client is not in a game.
+    - 1 - The client has not yet identified himself.
+    - 2 - The client is not in a game.
 
 ### Play a stone
 
@@ -166,10 +166,12 @@ STONE <x> <y>
 - `OK` : The stone has been placed on the board successfully.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - the client has not yet identified himself.
+    - 1 - The client has not yet identified himself.
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
     - 5 - The move is invalid
+    - 9 - The game has not yet started
+    - 10 - The game
 
 ### Pass your turn
 
@@ -186,9 +188,12 @@ PASS
 - `OK` : The client passed the turn successfully.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - the client has not yet identified himself.
+    - 1 - The client has not yet identified himself.
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
+    - 5 - The move is invalid
+    - 9 - The game has not yet started
+    - 10 - The game
 
 ### Forfeit the game
 
@@ -205,10 +210,12 @@ FORFEIT
 - `OK` : forfeit was successfull, game has been terminated with a loss for the client.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
-    - 1 - the client has not yet identified himself.
+    - 1 - The client has not yet identified himself.
     - 2 - The client is not in a game
     - 4 - It is not the clients turn
-
+    - 5 - The move is invalid
+    - 9 - The game has not yet started
+    - 10 - The game 
 
 ### Exit the server
 To exit the server, the client simply disconnects.
@@ -223,3 +230,7 @@ On an unknown message, the server answers with an error.
 - `ERROR <code>` : an error occurred,
   the code is an integer among the following list:
     - -1 - Unknown message received.
+
+## Examples
+
+![simple example](doc/diagrams/simple.png)

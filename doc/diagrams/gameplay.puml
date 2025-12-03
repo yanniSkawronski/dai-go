@@ -1,0 +1,76 @@
+@startuml
+skinparam noteTextAlignment center
+skinparam sequenceMessageAlign direction
+autonumber
+
+title "DAIGO Protocol - Play a Game of Go"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+note over c1, c2
+The 2 clients have joined the server as alice and bob,
+and have already joined the same game.
+end note
+
+== Start playing as black ==
+
+note over c1, c2
+Client alice asks about the status of the game, to know
+if she is the starting (black) player.
+end note
+
+c1 -> s : PLAY
+s -> c1 : START bob
+c1 -> s : STONE 3 4
+s -> c1 : OK
+
+== Get another players play ==
+
+note over c1, c2
+Client bob asks about the status of the game,
+to know if it is his turn and what
+move his opponent played.
+end note
+
+c2 -> s : PLAY
+s -> c2 : STONE 3 4
+c2 -> s : STONE 1 2
+s -> c2 : OK
+c2 -> s : PLAY
+s -> c2 : WAIT alice
+
+== End of the game ==
+
+note over c1, c2
+A game of go ends when both players pass.
+end note
+
+c1 -> s : PLAY
+s -> c1 : STONE 1 2
+c1 -> s : PASS
+s -> c1 : OK
+c2 -> s : PLAY
+s -> c2 : PASS
+c2 -> s : PASS
+s -> c2 : OK
+
+== Get the result ==
+
+c2 -> s : PLAY
+s -> c2 : RESULT 1
+c1 -> s : PLAY
+s -> c1 : RESULT -1
+
+== Recreate game after end ==
+
+c2 -> s : CREATE
+s -> c2 : OK
+
+c1 -> s : LIST
+s -> c1 : GAMES bob
+c1 -> s : JOIN bob
+s -> c1 : OK
+
+@enduml

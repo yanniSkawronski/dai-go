@@ -143,15 +143,20 @@ class Game {
     /**
      * Can the player make a move, aka is it his turn and is the game running
      * @param playerName Name of the player
-     * @return true if player can play else false
+     * @return GAME_NOT_STARTED or GAME_FINISHED or NOT_CLIENTS_TURN or empty if he can play
      */
-    private boolean canPlay(String playerName) {
-        if (!started || isFinished()) {
-            return false;
+    private Optional<ServerError> canPlay(String playerName) {
+        if (!started) {
+            return Optional.of(ServerError.GAME_NOT_STARTED);
+        }
+        if (isFinished()) {
+            return Optional.of(ServerError.GAME_FINISHED);
+        }
+        if (!checkTurn(amIBlack(playerName))) {
+            return Optional.of(ServerError.NOT_CLIENTS_TURN);
         }
 
-        boolean isBlack = amIBlack(playerName);
-        return checkTurn(isBlack);
+        return Optional.empty();
     }
 
     /**
@@ -162,8 +167,9 @@ class Game {
      * @return Optional empty if stone was successfull otherwise corresponding ServerError
      */
     synchronized Optional<ServerError> stone(String playerName, int x, int y) {
-        if (!canPlay(playerName)) {
-            return Optional.of(ServerError.NOT_CLIENTS_TURN);
+        Optional<ServerError> res = canPlay(playerName);
+        if (res.isPresent()) {
+            return res;
         }
         if (!this.board.playStone(x, y)) {
             return Optional.of(ServerError.INVALID_MOVE);
@@ -178,8 +184,9 @@ class Game {
      * @return Optional empty if pass was successfull otherwise corresponding ServerError
      */
     synchronized Optional<ServerError> pass(String playerName) {
-        if (!canPlay(playerName)) {
-            return Optional.of(ServerError.NOT_CLIENTS_TURN);
+        Optional<ServerError> res = canPlay(playerName);
+        if (res.isPresent()) {
+            return res;
         }
 
         if (!this.board.pass()) {
@@ -195,8 +202,9 @@ class Game {
      * @return Optional empty if pass was successfull otherwise corresponding ServerError
      */
     synchronized Optional<ServerError> forfeit(String playerName) {
-        if (!canPlay(playerName)) {
-            return Optional.of(ServerError.NOT_CLIENTS_TURN);
+        Optional<ServerError> res = canPlay(playerName);
+        if (res.isPresent()) {
+            return res;
         }
 
         if (this.forfeited || !this.board.resign()) {

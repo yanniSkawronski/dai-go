@@ -1,0 +1,24 @@
+@startuml
+skinparam noteTextAlignment center
+skinparam sequenceMessageAlign direction
+autonumber
+
+title "DAIGO Protocol - Forfeit a game"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+note over c1, c2
+The 2 clients have joined the server as alice and bob,
+and have already joined the same game.
+end note
+
+== Forfeit the game ==
+
+c1 -> s : FORFEIT
+s -> c1 : OK
+c2 -> s : PLAY
+s -> c2 : FORFEIT
+
+@enduml

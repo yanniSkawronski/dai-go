@@ -291,7 +291,7 @@ public class NiceClient {
     }
 
     public void launch() {
-        System.out.println("Nice Go Client starting...");
+        System.out.println("heiGO Client starting...");
 
         try (Socket socket = new Socket(host, PORT);
              OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
@@ -416,7 +416,7 @@ public class NiceClient {
             System.out.println("Error: " + e);
         }
 
-        System.out.println("Nice Go client stopping...");
+        System.out.println("heiGO Client stopping...");
 
     }
 }
