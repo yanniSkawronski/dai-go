@@ -105,16 +105,15 @@ class Game {
         if (!started) {
             return new GameStatus();
         }
+        if (forfeited) {
+            return new GameStatus(ServerReply.FORFEIT);
+        }
 
         boolean isBlack = amIBlack(playerName);
 
         String otherPlayer = opponentName(isBlack);
         if (otherPlayer == null) {
-            if (forfeited) {
-                return new GameStatus(ServerReply.FORFEIT);
-            } else {
-                return new GameStatus(ServerReply.DISCONNECT);
-            }
+            return new GameStatus(ServerReply.DISCONNECT);
         }
 
         int winner = this.board.winner();
