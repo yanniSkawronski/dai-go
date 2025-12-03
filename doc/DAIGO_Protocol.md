@@ -3,6 +3,29 @@
 The DAIGO protocol allows
 to play a game of GO between two users.
 
+<!-- TOC -->
+* [DAIGO Application Protocol](#daigo-application-protocol)
+  * [Transport](#transport)
+  * [Messages](#messages)
+    * [Join the server](#join-the-server)
+    * [Create a new game](#create-a-new-game-)
+    * [List open games](#list-open-games)
+    * [Join an existing game](#join-an-existing-game)
+    * [A player checks if he can play](#a-player-checks-if-he-can-play)
+    * [Play a stone](#play-a-stone)
+    * [Pass your turn](#pass-your-turn)
+    * [Forfeit the game](#forfeit-the-game)
+    * [Exit the server](#exit-the-server)
+    * [Unknown Message](#unknown-message)
+  * [Examples](#examples)
+    * [Functional Example](#functional-example)
+    * [Errors on joining the server](#errors-on-joining-the-server)
+    * [Errors on creating or joining a game](#errors-on-creating-or-joining-a-game)
+    * [Gameplay Example](#gameplay-example)
+    * [Gameplay errors](#gameplay-errors)
+    * [Forfeiting a game](#forfeiting-a-game)
+<!-- TOC -->
+
 ## Transport
 
 The DAIGO protocol must use tcp and usually uses port 1919.
@@ -233,4 +256,20 @@ On an unknown message, the server answers with an error.
 
 ## Examples
 
-![simple example](doc/diagrams/simple.png)
+### Functional Example
+![simple example](./diagrams/simple.png)
+
+### Errors on joining the server
+![login errors example](./diagrams/login_error.png)
+
+### Errors on creating or joining a game
+![game join example](./diagrams/join_game_error.png)
+
+### Gameplay Example
+![gameplay example](./diagrams/gameplay.png)
+
+### Gameplay errors
+![gameplay errors example](./diagrams/game_error.png)
+
+### Forfeiting a game
+![forfeit example](./diagrams/forfeit.png)
