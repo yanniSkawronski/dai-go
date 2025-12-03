@@ -3,7 +3,7 @@ skinparam noteTextAlignment center
 skinparam sequenceMessageAlign direction
 autonumber
 
-title "DAIGO Protocol - Functional example"
+title "DAIGO Protocol - Play a Game of Go"
 
 participant "Client 1" as c1
 participant "Server" as s
@@ -30,8 +30,8 @@ s -> c1 : OK
 
 note over c1, c2
 Client bob asks about the status of the game,
-to know if it is his turn,
-and what move his opponent played.
+to know if it is his turn and what
+move his opponent played.
 end note
 
 c2 -> s : PLAY
