@@ -413,7 +413,11 @@ public class NiceClient {
 
             } // end while
 
-        } catch (IOException | RuntimeException e) {
+        }
+        catch(IllegalArgumentException e) {
+            System.out.println("Invalid answer from the serer !");
+        }
+        catch (IOException | RuntimeException e) {
             System.out.println("Error: " + e);
         }
 
