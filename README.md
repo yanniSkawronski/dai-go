@@ -1,6 +1,6 @@
 # DAIGO
 
-The DAIGO project is both a CLI client and a server made to
+The DAIGO (heiGO) project is both a CLI client and a server made to
 play a game of Go over the internet.
 They use the [DAIGO](#daigo-application-protocol)
 protocol.
